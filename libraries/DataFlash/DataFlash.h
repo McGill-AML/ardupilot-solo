@@ -107,6 +107,19 @@ public:
     void Log_Write_R10CGimbal(float pref, float rout, float pout, uint32_t rpwm, uint32_t ppwm);
     bool logging_started(void);
 
+    // Structure provides information on the internal member data of tau
+    struct TAU_info {
+        float tauref;
+        float taumeas;
+        float kendoul;
+        float hybrid;
+        float error;
+        float timenow;
+    };
+
+    // void Log_Write_Tauland(AC_TAU &tau);
+    void Log_Write_Tauland(const TAU_info tau);
+    
     // for DataFlash_MAVLink:
     void remote_log_block_status_msg(mavlink_channel_t chan,
                                      mavlink_message_t* msg);

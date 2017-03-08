@@ -958,3 +958,40 @@ float AC_PosControl::calc_leash_length(float speed_cms, float accel_cms, float k
 
     return leash_length;
 }
+
+//      Use the built in rate_to_accel controller, by directly feeding desired rates
+//      make sure to properly set the limits and to reset proper flags
+void AC_PosControl::set_velocity_control(float des_vel)
+{   
+    // check time since last cast
+    uint32_t now = hal.scheduler->millis();
+    if (now - _last_update_z_ms > POSCONTROL_ACTIVE_TIMEOUT_MS) {
+        _flags.reset_rate_to_accel_z = true;
+        _flags.reset_accel_to_throttle = true;
+    }
+    _last_update_z_ms = now;
+
+    _vel_target.z = des_vel*100.0;
+
+    // check speed limits
+    // To-Do: check these speed limits here or in the pos->rate controller
+    _limit.vel_up = false;
+    _limit.vel_down = false;
+    if (_vel_target.z < _speed_down_cms) {
+        _vel_target.z = _speed_down_cms;
+        _limit.vel_down = true;
+    }
+    if (_vel_target.z > _speed_up_cms) {
+        _vel_target.z = _speed_up_cms;
+        _limit.vel_up = true;
+    }
+    
+    // add feed forward component
+    if (_flags.enable_z_vel_ff) {
+        _vel_target.z += _vel_desired.z;
+    }
+
+    // call rate based throttle controller which will update accel based throttle controller targets
+    rate_to_accel_z();
+
+}

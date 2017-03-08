@@ -110,7 +110,10 @@ enum aux_sw_func {
 #define AUTOTUNE    15                  // autotune the vehicle's roll and pitch gains
 #define POSHOLD     16                  // position hold with manual override
 #define STOP        17                  // Full-Stop using inertial/GPS system, no pilot input
-#define NUM_MODES   18
+#define TAULAND     18                  // Tau land using tau as a control input
+#define TAUPOSLAND  19                  // Tau land using position as a control input
+#define TAUVELLAND  20                  // Tau land using velocity as a control input
+#define NUM_MODES   21
 
 #define DEPRECATED_MODES_MASK ((1UL<<8)|(1UL<<10)|(1UL<<12))
 

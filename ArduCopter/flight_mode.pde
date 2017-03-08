@@ -94,6 +94,18 @@ static bool set_mode(uint8_t mode)
             success = stop_init(ignore_checks);
             break;
 
+        case TAULAND :
+            success = tauland_init(ignore_checks);
+            break;
+
+        case TAUPOSLAND :
+            success = tauposland_init(ignore_checks);
+            break; 
+
+        case TAUVELLAND :
+            success = tauvelland_init(ignore_checks);
+            break;                 
+
         default:
             success = false;
             break;
@@ -206,6 +218,18 @@ static void update_flight_mode()
         case STOP:
             stop_run();
             break;
+
+        case TAULAND:
+            tauland_run();
+            break;    
+        
+        case TAUPOSLAND:
+            tauposland_run();
+            break; 
+
+        case TAUVELLAND:
+            tauposland_run();
+            break; 
     }
 }
 
@@ -376,6 +400,15 @@ print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
     case POSHOLD:
         port->print_P(PSTR("POSHOLD"));
         break;
+    case TAULAND:
+        port->print_P(PSTR("TAULAND"));
+        break;
+    case TAUPOSLAND:
+        port->print_P(PSTR("TAUPOSLAND"));
+        break;
+    case TAUVELLAND:
+        port->print_P(PSTR("TAUVELLAND"));
+        break;        
     default:
         port->printf_P(PSTR("Mode(%u)"), (unsigned)mode);
         break;

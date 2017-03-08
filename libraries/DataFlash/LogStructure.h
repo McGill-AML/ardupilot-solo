@@ -336,6 +336,17 @@ struct PACKED log_Attitude {
     uint16_t error_yaw;
 };
 
+struct PACKED log_TAU {
+    LOG_PACKET_HEADER;
+    uint32_t time_ms;
+    float tauref;
+    float taumeas;
+    float kendoul;
+    float hybrid;
+    float error;
+    float timenow;
+};
+
 struct PACKED log_Current {
     LOG_PACKET_HEADER;
     uint32_t time_ms;
@@ -559,6 +570,8 @@ Format characters in the format string for binary log messages
       "IMU3",  "IffffffIIf",     "TimeMS,GyrX,GyrY,GyrZ,AccX,AccY,AccZ,ErrG,ErrA,Temp" }, \
     { LOG_AHR2_MSG, sizeof(log_AHRS), \
       "AHR2","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
+    { LOG_TAUZ_MSG, sizeof(log_TAU), \
+      "TAUZ","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
     { LOG_SIMSTATE_MSG, sizeof(log_AHRS), \
       "SIM","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_EKF1_MSG, sizeof(log_EKF1), \
@@ -696,6 +709,7 @@ Format characters in the format string for binary log messages
 #define LOG_DF_MAV_STATS  184
 #define LOG_EKF6_MSG      185
 #define LOG_R10CGIMBAL_MSG 186
+#define LOG_TAUZ_MSG      187
 
 // message types 200 to 210 reversed for GPS driver use
 // message types 211 to 220 reversed for autotune use

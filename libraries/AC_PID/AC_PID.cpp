@@ -207,3 +207,11 @@ float AC_PID::get_filt_alpha() const
     float rc = 1/(M_2PI_F*_filt_hz);
     return _dt / (_dt + rc);
 }
+
+// reset filter - tau edit
+void AC_PID::reset_filter()
+{
+    _flags._reset_filter = true;
+    _integrator = 0.0f;
+    _derivative = 0.0f;
+}

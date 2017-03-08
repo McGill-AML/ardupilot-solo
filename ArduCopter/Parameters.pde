@@ -352,42 +352,42 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @Param: FLTMODE1
     // @DisplayName: Flight Mode 1
     // @Description: Flight mode when Channel 5 pwm is <= 1230
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode1, "FLTMODE1",               FLIGHT_MODE_1),
 
     // @Param: FLTMODE2
     // @DisplayName: Flight Mode 2
     // @Description: Flight mode when Channel 5 pwm is >1230, <= 1360
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode2, "FLTMODE2",               FLIGHT_MODE_2),
 
     // @Param: FLTMODE3
     // @DisplayName: Flight Mode 3
     // @Description: Flight mode when Channel 5 pwm is >1360, <= 1490
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode3, "FLTMODE3",               FLIGHT_MODE_3),
 
     // @Param: FLTMODE4
     // @DisplayName: Flight Mode 4
     // @Description: Flight mode when Channel 5 pwm is >1490, <= 1620
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode4, "FLTMODE4",               FLIGHT_MODE_4),
 
     // @Param: FLTMODE5
     // @DisplayName: Flight Mode 5
     // @Description: Flight mode when Channel 5 pwm is >1620, <= 1749
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode5, "FLTMODE5",               FLIGHT_MODE_5),
 
     // @Param: FLTMODE6
     // @DisplayName: Flight Mode 6
     // @Description: Flight mode when Channel 5 pwm is >=1750
-    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold
+    // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,16:PosHold,18:TAULAND,19:TAUPOSLAND,20:TAUVELLAND
     // @User: Standard
     GSCALAR(flight_mode6, "FLTMODE6",               FLIGHT_MODE_6),
 
@@ -683,7 +683,43 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @Values: 0:Disabled,0.1:Very Low,0.2:Low,0.3:Medium,0.4:High,0.5:Very High
     // @User: Advanced
     GSCALAR(acro_expo,  "ACRO_EXPO",    ACRO_EXPO_DEFAULT),
+    
+    // Tau Control
+    //---------------
+    
+    // @Param: TAU_TIME_FINAL
+    // @DisplayName: Tau Time Final
+    // @Description: Time to get the quadcopter to land
+    // @Range: 0 100
+    // @User: Basic
+    GSCALAR(tau_time_final,  "TAU_TIME_FINAL",    10.0),
 
+    // @Param: TAU_Z_K_CONS
+    // @DisplayName: Tau Z Const
+    // @Description: K Constant for vertical landing
+    // @Range: 0 0.5
+    // @User: Advanced
+    GSCALAR(tau_z_cons,  "TAU_Z_K_CONS",    0.4),
+
+    // @Param: TAU_Z_PID_P
+    // @DisplayName: Tau Z PID P
+    // @Description: Proportional gain for tau vertical landing
+    // @User: Advanced
+    GSCALAR(tau_z_pid_p,  "TAU_Z_PID_P",    40.0),
+
+    // @Param: TAU_Z_PID_P
+    // @DisplayName: Tau Z PID I
+    // @Description: Integral gain for tau vertical landing
+    // @User: Advanced
+    GSCALAR(tau_z_pid_i,  "TAU_Z_PID_I",    8.0),
+
+    // @Param: TAU_Z_PID_D
+    // @DisplayName: Tau Z PID D
+    // @Description: Derivative gain for tau vertical landing
+    // @User: Advanced
+    GSCALAR(tau_z_pid_d,  "TAU_Z_PID_D",    0.0),
+
+    
     // PID controller
     //---------------
 

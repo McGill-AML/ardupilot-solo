@@ -195,6 +195,13 @@ public:
         k_param_ch12_option,
         k_param_takeoff_trigger_dz, // 124
 
+        // 125: TAU parameters
+        k_param_tau_time_final,
+        k_param_tau_z_cons,
+        k_param_tau_z_pid_p,
+        k_param_tau_z_pid_i,
+        k_param_tau_z_pid_d,
+
         // 131: Solo parameters
         //
         k_param_spd_lim_rate_cmss = 131,
@@ -443,6 +450,14 @@ public:
     AP_Int8         land_repositioning;
     AP_Int8         fs_ekf_action;
     AP_Float        fs_ekf_thresh;
+
+    // Tau Landing parameters
+    AP_Float                tau_time_final;     // Final time used for tau landing
+    AP_Float                tau_z_cons;         // K Constant for z direction
+    AP_Float                tau_z_pid_p;        // Proportional control for z direction
+    AP_Float                tau_z_pid_i;        // Integral control for z direction
+    AP_Float                tau_z_pid_d;        // Derivative control for z direction
+
 
 #if FRAME_CONFIG ==     HELI_FRAME
     // Heli

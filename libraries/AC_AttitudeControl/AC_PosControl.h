@@ -111,6 +111,8 @@ public:
     /// set_throttle_hover - update estimated throttle required to maintain hover
     void set_throttle_hover(float throttle) { _throttle_hover = throttle; }
 
+    float get_throttle_hover() const { return _throttle_hover; }
+
     /// set_alt_target - set altitude target in cm above home
     void set_alt_target(float alt_cm) { _pos_target.z = alt_cm; }
 
@@ -272,6 +274,8 @@ public:
     float time_since_last_xy_update() const;
 
     static const struct AP_Param::GroupInfo var_info[];
+
+    void set_velocity_control(float des_vel);
 
 private:
 

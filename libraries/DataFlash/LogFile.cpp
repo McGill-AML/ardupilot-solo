@@ -1369,10 +1369,10 @@ void DataFlash_Class::Log_Write_Airspeed(AP_Airspeed &airspeed)
 
 // Write tau land packet, currently only for z direction
 // void DataFlash_Class::Log_Write_Tauland(AC_TAU &tau)
-void DataFlash_Class::Log_Write_Tauland(const TAU_info tau)
+void DataFlash_Class::Log_Write_Tauland(int msg, const TAU_info tau)
 {
     struct log_TAU pkt = {
-        LOG_PACKET_HEADER_INIT(LOG_TAUZ_MSG),
+        LOG_PACKET_HEADER_INIT(msg),
         time_ms : hal.scheduler->millis(),
         tauref  : tau.tauref,
         taumeas : tau.taumeas,

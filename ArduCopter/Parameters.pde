@@ -719,6 +719,38 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @User: Advanced
     GSCALAR(tau_z_pid_d,  "TAU_Z_PID_D",    0.0),
 
+    // @Param: TAU_X_K_CONS
+    // @DisplayName: Tau X Const
+    // @Description: K Constant for Pitch
+    // @Range: 0 0.5
+    // @User: Advanced
+    GSCALAR(tau_x_cons,  "TAU_X_K_CONS",    0.4),
+
+    // @Param: TAU_Y_K_CONS
+    // @DisplayName: Tau Y Const
+    // @Description: K Constant for Roll
+    // @Range: 0 0.5
+    // @User: Advanced
+    GSCALAR(tau_y_cons,  "TAU_Y_K_CONS",    0.4),
+
+    // @Param: TAU_Z_PID_P
+    // @DisplayName: Tau XY PID P
+    // @Description: Proportional gain for tau horizontal motion
+    // @User: Advanced
+    GSCALAR(tau_xy_pid_p,  "TAU_XY_PID_P",    15.0),
+
+    // @Param: TAU_Z_PID_P
+    // @DisplayName: Tau XY PID I
+    // @Description: Integral gain for tau horizontal motion
+    // @User: Advanced
+    GSCALAR(tau_xy_pid_i,  "TAU_XY_PID_I",    2.0),
+
+    // @Param: TAU_Z_PID_D
+    // @DisplayName: Tau XY PID D
+    // @Description: Derivative gain for tau horizontal motion
+    // @User: Advanced
+    GSCALAR(tau_xy_pid_d,  "TAU_XY_PID_D",    0.0),
+
     
     // PID controller
     //---------------
@@ -792,7 +824,7 @@ const AP_Param::Info var_info[] PROGMEM = {
 #endif
 
     // @Param: RATE_YAW_P
-    // @DisplayName: Yaw axis rate controller P gain
+    // @DisplayName: Yaw axis rate controller P gain 
     // @Description: Yaw axis rate controller P gain.  Converts the difference between desired yaw rate and actual yaw rate into a motor speed output
     // @Range: 0.150 0.50
     // @Increment: 0.005

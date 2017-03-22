@@ -132,17 +132,13 @@ static void tau_vel_land_run_vertical_control(bool pause_descent)
 
     // Set desired velocity and call function
     pos_control.set_velocity_control(tau_z.get_tau_velocity());
-    // pos_control.set_alt_target_from_climb_rate(100.0*tau_z.get_tau_velocity(), G_Dt, true);
-    // pos_control.update_z_controller();
 
-    // Logging Data
-    DataFlash_Class::TAU_info my_tau_val;
-    my_tau_val = tau_z.get_tau_info();
-    tau_z_info = my_tau_val;
+    // Logging the data
+    tau_z_info = tau_z.get_tau_info();
 
 
     /// PRINT TO SCREEN:
-    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
+    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), -tau_control_updated/10.0f);
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, pid: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f ",position_z, velocity_z, time_now, tau_meas_z, tau_ref_z, tau_err_z.error_switch, tau_thr_out, tau_err_z.kendoul, tau_err_z.hybrid, thr_hover, tau_control_input);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f, thr_in: %3.3f, thr_upd: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid(), tau_control_input, tau_control_updated);

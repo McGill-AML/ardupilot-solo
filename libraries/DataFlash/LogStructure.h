@@ -572,6 +572,10 @@ Format characters in the format string for binary log messages
       "AHR2","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_TAUZ_MSG, sizeof(log_TAU), \
       "TAUZ","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
+    { LOG_TAUX_MSG, sizeof(log_TAU), \
+      "TAUX","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
+    { LOG_TAUY_MSG, sizeof(log_TAU), \
+      "TAUY","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
     { LOG_SIMSTATE_MSG, sizeof(log_AHRS), \
       "SIM","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_EKF1_MSG, sizeof(log_EKF1), \
@@ -710,6 +714,8 @@ Format characters in the format string for binary log messages
 #define LOG_EKF6_MSG      185
 #define LOG_R10CGIMBAL_MSG 186
 #define LOG_TAUZ_MSG      187
+#define LOG_TAUX_MSG      188
+#define LOG_TAUY_MSG      189     
 
 // message types 200 to 210 reversed for GPS driver use
 // message types 211 to 220 reversed for autotune use

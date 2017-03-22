@@ -168,6 +168,13 @@ public:
         //
         k_param_motors = 90,
 
+        // 91: TAU Parameters
+        k_param_tau_x_cons,
+        k_param_tau_y_cons,
+        k_param_tau_xy_pid_p,
+        k_param_tau_xy_pid_i,
+        k_param_tau_xy_pid_d, // 95
+
         //
         // 100: Inertial Nav
         //
@@ -452,6 +459,11 @@ public:
     AP_Float        fs_ekf_thresh;
 
     // Tau Landing parameters
+    AP_Float                tau_x_cons;         // K Constant for x direction
+    AP_Float                tau_y_cons;         // K Constant for y direction
+    AP_Float                tau_xy_pid_p;       // Proportional control for xy direction
+    AP_Float                tau_xy_pid_i;       // Integral control for xy direction
+    AP_Float                tau_xy_pid_d;       // Derivative control for xy direction
     AP_Float                tau_time_final;     // Final time used for tau landing
     AP_Float                tau_z_cons;         // K Constant for z direction
     AP_Float                tau_z_pid_p;        // Proportional control for z direction

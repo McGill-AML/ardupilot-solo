@@ -228,7 +228,7 @@ static void update_flight_mode()
             break; 
 
         case TAUVELLAND:
-            tauposland_run();
+            tauvelland_run();
             break; 
     }
 }

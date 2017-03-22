@@ -755,6 +755,8 @@ static bool pre_arm_checks(bool display_failure);
 // Tau variables for logging
 ////////////////////////////////////////////////////////////////////////////////
 DataFlash_Class::TAU_info tau_z_info;
+DataFlash_Class::TAU_info tau_x_info;
+DataFlash_Class::TAU_info tau_y_info;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Top-level logic
@@ -1066,6 +1068,9 @@ static void ten_hz_logging_loop()
         Log_Write_Nav_Tuning();
     }
     Log_Write_Land_Detector();
+    DataFlash.Log_Write_Tauland(LOG_TAUZ_MSG, tau_z_info); // z logging
+    DataFlash.Log_Write_Tauland(LOG_TAUX_MSG, tau_x_info); // x logging 
+    DataFlash.Log_Write_Tauland(LOG_TAUY_MSG, tau_y_info); // y logging
 }
 
 // fifty_hz_logging_loop

@@ -91,7 +91,7 @@ void AC_TAU::meas_tau()
 void AC_TAU::error_tau()
 {	
 	// if tau measured is very small, the hybrid and kendoul error are 0
-	if (fabsf(_measured_tau) <= 0.01) {
+	if (fabsf(_measured_tau) <= 0.01 || _k_const == 0.0) {
 		_kendoul = 0.0;
 		_hybrid = 0.0;
 	
@@ -175,7 +175,6 @@ void AC_TAU::update_reference()
 		_tau_acceleration = 2.0*const1/_k_const*((2.0 - _k_const)/_k_const*_time_now*_time_now - _final_time*_final_time)*pow(ftime_ctime, 1.0/_k_const - 2.0);
 
 	} else {
-		
 		_tau_position = 0.0;
 		_tau_velocity = 0.0;
 		_tau_acceleration = 0.0;

@@ -3,9 +3,6 @@
 // Tau Object class
 // Computes all the required things
 
-// #ifndef	__AC_TAU_H__
-// #define __AC_TAU_H__
-
 #include <AP_Math.h>
 #include <DataFlash.h>
 

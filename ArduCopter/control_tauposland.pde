@@ -127,22 +127,17 @@ static void tau_pos_land_run_vertical_control(bool pause_descent)
 
     // Set desired position and call function
     pos_control.set_alt_target(desired_position_z*100.0);
-    // pos_control.set_speed_z(-1200.0, 1200.0);
-    // pos_control.set_alt_target_with_slew(desired_position_z*100.0, G_Dt);
     pos_control.update_z_controller();
 
     // Logging the data
-    DataFlash_Class::TAU_info my_tau_val;
-    my_tau_val = tau_z.get_tau_info();
-    tau_z_info = my_tau_val;
+    tau_z_info = tau_z.get_tau_info();
 
     /// PRINT TO SCREEN:
-    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
+    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), -tau_control_updated/10.0f);
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, pid: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f ",position_z, velocity_z, time_now, tau_meas_z, tau_ref_z, tau_err_z.error_switch, tau_thr_out, tau_err_z.kendoul, tau_err_z.hybrid, thr_hover, tau_control_input);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f, thr_in: %3.3f, thr_upd: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid(), tau_control_input, tau_control_updated);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid());
     // hal.console->printf("%3.3f %3.3f\n", myval, myval2); //(millis()-tauposland_start_time)/1000.0);
-
 }
 

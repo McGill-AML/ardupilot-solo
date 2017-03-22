@@ -117,9 +117,9 @@ public:
         float timenow;
     };
 
-    // void Log_Write_Tauland(AC_TAU &tau);
-    void Log_Write_Tauland(const TAU_info tau);
-    
+    // void Log_Write_Tauland(const TAU_info tau);
+    void Log_Write_Tauland(int msg, const TAU_info tau);
+
     // for DataFlash_MAVLink:
     void remote_log_block_status_msg(mavlink_channel_t chan,
                                      mavlink_message_t* msg);

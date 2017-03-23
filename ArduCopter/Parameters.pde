@@ -719,6 +719,13 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @User: Advanced
     GSCALAR(tau_z_pid_d,  "TAU_Z_PID_D",    0.0),
 
+    // @Param: TAU_TARGET_Z
+    // @DisplayName: Tau Z target
+    // @Description: Final height desired w.r.t. to home altitude in meters
+    // @User: Advanced
+    GSCALAR(tau_target_z,  "TAU_TARGET_Z",    1.0),
+    
+
     // @Param: TAU_X_K_CONS
     // @DisplayName: Tau X Const
     // @Description: K Constant for Pitch

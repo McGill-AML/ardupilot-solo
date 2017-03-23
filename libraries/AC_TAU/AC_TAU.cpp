@@ -7,11 +7,15 @@ AC_TAU::AC_TAU(float fin_time, float k_const_val1, float sat_tau, float sat_err)
 	_position = 0.0;
 	_velocity = 1.0;
 	_final_time = fin_time;
+	_final_position = 0.0;
 	_time_now = 0.0;
+	
 	_k_const = k_const_val1;
 	_sat_tau = sat_tau;
 	_sat_err = sat_err;
 	_switch_time = floorf(0.5*_final_time);
+
+	// For logging purposes - NOTE: could initialize this another way
 	_tau_info.tauref 	= 0.0;
 	_tau_info.taumeas 	= 0.0;
 	_tau_info.kendoul 	= 0.0;
@@ -20,17 +24,21 @@ AC_TAU::AC_TAU(float fin_time, float k_const_val1, float sat_tau, float sat_err)
 	_tau_info.timenow 	= 0.0;
 }
 
+// Used for sending final time and k_constant value when initializing 
 void AC_TAU::operator() (float fin_time, float k_const_val)
 { 
 	_k_const = k_const_val;
 	_final_time = fin_time; 
 	_switch_time = floorf(0.5*_final_time);
 
+	_final_position = 0.0;
+
 	// Set Initial values
 	_position = 0.0;
-	_velocity = 1.0;
+	_velocity = 1.0; 
 	_time_now = 0.0;
 
+	// For logging purposes - NOTE: could initialize this another way
 	_tau_info.tauref 	= 0.0;
 	_tau_info.taumeas 	= 0.0;
 	_tau_info.kendoul 	= 0.0;
@@ -39,13 +47,36 @@ void AC_TAU::operator() (float fin_time, float k_const_val)
 	_tau_info.timenow 	= 0.0;
 }
 
+// Overloading Used for sending final time, k_constant, and final position value when initializing 
+void AC_TAU::operator() (float fin_time, float k_const_val, float fin_pos)
+{ 
+	// Set initial parameters
+	_k_const = k_const_val;
+	_final_time = fin_time; 
+	_switch_time = floorf(0.5*_final_time);
 
+	_final_position = fin_pos;
+
+	// Set Initial values for variables
+	_position = 0.0;
+	_velocity = 1.0;
+	_time_now = 0.0;
+
+	// For logging purposes - NOTE: could initialize this another way
+	_tau_info.tauref 	= 0.0;
+	_tau_info.taumeas 	= 0.0;
+	_tau_info.kendoul 	= 0.0;
+	_tau_info.hybrid 	= 0.0;
+	_tau_info.error 	= 0.0;
+	_tau_info.timenow 	= 0.0;
+}
 
 void AC_TAU::set_pos_vel_time(float position, float velocity, float time_now)
-{
-	_position = position;
+{	
+	// The position and velocity being fed in here should be in the target frame!
+	_position = position;	
 	_velocity = velocity;
-	_time_now = time_now; 	// update current time when this function is called
+	_time_now = time_now; 	
 }
 
 // Calculate the reference tau value given the tau parameters

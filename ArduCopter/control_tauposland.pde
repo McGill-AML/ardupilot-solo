@@ -51,7 +51,7 @@ static bool tauposland_init(bool ignore_checks)
 
     // Tau object
     tau_z(g.tau_time_final, g.tau_z_cons);      // Set final time, and k const
-    tau_z.initial_position(inertial_nav.get_altitude()/100.0 - 1.0);  // Set the initial position
+    tau_z.initial_position(inertial_nav.get_altitude()/100.0 - g.tau_target_z);  // Set the initial position
 
     // Initialize PID to the correct values
     tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, tau_imax, tau_filter, tau_dt);
@@ -110,7 +110,7 @@ static void tau_pos_land_run_vertical_control(bool pause_descent)
 
     // get position z
     position_z = inertial_nav.get_altitude()/100.0; // (m)
-    float desired_position_z = tau_z.get_tau_position() + 1.0;   // (m) --> ADD 1.0 to land 1.0 above the ground
+    float desired_position_z = tau_z.get_tau_position() + g.tau_target_z;   // (m) --> ADD 1.0 to land 1.0 above the ground because desired tau position already knows we are travelling 1m less
 
     // get velocity
     // at time 0.0 s hard code velocity to 0.0 m/s (this may need to be changed)
@@ -133,7 +133,7 @@ static void tau_pos_land_run_vertical_control(bool pause_descent)
     tau_z_info = tau_z.get_tau_info();
 
     /// PRINT TO SCREEN:
-    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
+    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), -tau_control_updated/10.0f);
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, pid: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f ",position_z, velocity_z, time_now, tau_meas_z, tau_ref_z, tau_err_z.error_switch, tau_thr_out, tau_err_z.kendoul, tau_err_z.hybrid, thr_hover, tau_control_input);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f, thr_in: %3.3f, thr_upd: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid(), tau_control_input, tau_control_updated);

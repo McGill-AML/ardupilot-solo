@@ -208,6 +208,7 @@ public:
         k_param_tau_z_pid_p,
         k_param_tau_z_pid_i,
         k_param_tau_z_pid_d,
+        k_param_tau_target_z, 
 
         // 131: Solo parameters
         //
@@ -469,6 +470,7 @@ public:
     AP_Float                tau_z_pid_p;        // Proportional control for z direction
     AP_Float                tau_z_pid_i;        // Integral control for z direction
     AP_Float                tau_z_pid_d;        // Derivative control for z direction
+    AP_Float                tau_target_z;
 
 
 #if FRAME_CONFIG ==     HELI_FRAME

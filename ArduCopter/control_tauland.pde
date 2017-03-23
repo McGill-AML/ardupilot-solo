@@ -139,11 +139,11 @@ static void tauland_gps_run()
         tauland_pause = false;
     }
     
-    // land_run_horizontal_control();
+    land_run_horizontal_control();
     // land_run_vertical_control(tauland_pause);
     
-    tau_land_run_horizontal_control();
-    // tau_land_run_vertical_control(tauland_pause);
+    // tau_land_run_horizontal_control();
+    tau_land_run_vertical_control(tauland_pause);
 }
 
 // Vertical controller for tau landing called from myland_run()
@@ -165,7 +165,7 @@ static void tau_land_run_vertical_control(bool pause_descent)
     }
 
     // get position z
-    position_z = inertial_nav.get_altitude()/100.0 - 1.0; // (m) --> to land 1.0 m above the ground
+    position_z = inertial_nav.get_altitude()/100.0 - g.tau_target_z; // (m) --> to land 1.0 m above the ground
 
     // Tau object
     tau_z.set_pos_vel_time(position_z, velocity_z, time_now);
@@ -208,7 +208,7 @@ static void tau_land_run_vertical_control(bool pause_descent)
 
     /// PRINT TO SCREEN:
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, thr_out: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, tau_z.kendoul(), tau_z.hybrid(), motors.get_throttle_hover(), tau_control_updated);
-    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
+    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, pid: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f ",position_z, velocity_z, time_now, tau_meas_z, tau_ref_z, tau_err_z.error_switch, tau_thr_out, tau_err_z.kendoul, tau_err_z.hybrid, thr_hover, tau_control_input);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f, thr_in: %3.3f, thr_upd: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid(), tau_control_input, tau_control_updated);
     // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid());
@@ -298,13 +298,13 @@ static void tau_land_run_horizontal_control()
     // Approach angle
     float psi = wp_nav.get_yaw()/100.0*DEG_TO_RAD;   // get_yaw() returned in centi-degrees
 
-    // float cos_ap = cos(alpha_approach - psi);
-    // float sin_ap = sin(alpha_approach - psi);
-    float cos_ap = cos(0);
-    float sin_ap = sin(0);
+    float cos_ap = cos(alpha_approach - psi);
+    float sin_ap = sin(alpha_approach - psi);
+    // float cos_ap = cos(0);
+    // float sin_ap = sin(0);
 
     float pitch = 1.0*(tau_pid_x.get_pid()*cos_ap - tau_pid_y.get_pid()*sin_ap);  // phi, may need a negative infront of it
-    float roll  = -1.0*(tau_pid_y.get_pid()*cos_ap + tau_pid_x.get_pid()*sin_ap);  // theta
+    float roll  = 1.0*(tau_pid_y.get_pid()*cos_ap + tau_pid_x.get_pid()*sin_ap);  // theta.. THiS NEEDS TO BE NEGATIVE IF IM USING COS_AP = 1.0, SIN_AP = 0.0
 
     // constrain angles using tanh() and convert to centidegrees
     pitch = int(pitch*100.0); 

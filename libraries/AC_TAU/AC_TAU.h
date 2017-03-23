@@ -71,6 +71,7 @@ protected:
 	float		_error_switch;
 
 	float 		_final_time;
+	float		_final_position; // only one variable is used for each axis
 	float 		_time_now;
 
 	// Reference Tau Data

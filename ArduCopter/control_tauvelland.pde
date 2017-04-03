@@ -7,30 +7,7 @@
  */
 
 static uint32_t tauvelland_start_time;
-// static float land_final_time; // final time for landing; should be a parameter
-// static float time_now;        // current time for tau control   
 
-// static bool land_pause;
-
-// static float position_z;
-// static float velocity_z;
-
-// static float tau_control_input;
-
-// /// PID Law
-// // PID setup
-// static float tau_p = 0.0;
-// static float tau_i = 0.0;
-// static float tau_d = 0.0;
-// static float tau_imax = 25.0;
-// static float tau_filter = 5.0;
-// static float tau_dt = 0.0025;
-
-// // declare pid block
-// static AC_PID tau_pid_z(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
-
-// // Tau object
-// static AC_TAU tau_z(0.0, 0.0, 100.0, 1.0); 
 
 
 // land_init - initialise land controller
@@ -52,12 +29,16 @@ static bool tauvelland_init(bool ignore_checks)
     land_pause = false;
 
     // Tau object
-    tau_z(g.tau_time_final, g.tau_z_cons);      // Set final time, and k const
-    tau_z.initial_position(inertial_nav.get_altitude()/100.0 - g.tau_target_z);  // Set the initial position
+    tau_z(g.tau_time_final, g.tau_z_cons, g.tau_target_z);      // Set final time, and k const
+    tau_z.initial_position(inertial_nav.get_altitude()/100.0); // - g.tau_target_z);  // Set the initial position
 
     // Initialize PID to the correct values
     tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, tau_imax, tau_filter, tau_dt);
     tau_pid_z.reset_filter();
+
+    if (g.tau_z_cons == 0.0) {
+        set_mode(STOP);
+    }
 
 
     return true;
@@ -92,10 +73,7 @@ static void tauvelland_gps_run()
 
     // pause before beginning land descent
     if(land_pause && millis()-tauvelland_start_time >= LAND_WITH_DELAY_MS) {
-        land_pause = false;    pos_control.set_velocity_control(tau_z.get_tau_velocity());
-    // pos_control.set_alt_target_from_climb_rate(100.0*tau_z.get_tau_velocity(), G_Dt, true);
-    // pos_control.update_z_controller();
-
+        land_pause = false;    
     }
     
     land_run_horizontal_control();
@@ -114,7 +92,7 @@ static void tau_vel_land_run_vertical_control(bool pause_descent)
     tau_z.update_reference();    
 
     // get position z
-    position_z = inertial_nav.get_altitude()/100.0 - 0.05; // (m)
+    position_z = inertial_nav.get_altitude()/100.0; // (m)
     float desired_position_z = tau_z.get_tau_position();   // (m)
 
     // get velocity
@@ -136,6 +114,13 @@ static void tau_vel_land_run_vertical_control(bool pause_descent)
     // Logging the data
     tau_z_info = tau_z.get_tau_info();
 
+    // To return control back to me 
+    if (time_now >= tau_z.final_time()+0.5) {   
+        if (count_landed > 5) {
+            set_mode(STOP);
+        }
+        count_landed++;
+    }
 
     /// PRINT TO SCREEN:
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref());
@@ -146,4 +131,3 @@ static void tau_vel_land_run_vertical_control(bool pause_descent)
     // hal.console->printf("%3.3f %3.3f\n", myval, myval2); //(millis()-tauvelland_start_time)/1000.0);
 
 }
-

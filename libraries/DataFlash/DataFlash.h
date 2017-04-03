@@ -115,6 +115,8 @@ public:
         float hybrid;
         float error;
         float timenow;
+        float gap;
+        float gaprate;
     };
 
     // void Log_Write_Tauland(const TAU_info tau);

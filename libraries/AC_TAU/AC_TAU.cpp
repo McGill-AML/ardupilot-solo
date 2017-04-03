@@ -2,65 +2,52 @@
 
 // Constructor 
 AC_TAU::AC_TAU(float fin_time, float k_const_val1, float sat_tau, float sat_err)
-{
+{	
+	initialize_tau();
+
 	// Set Initial values
-	_position = 0.0;
-	_velocity = 1.0;
 	_final_time = fin_time;
-	_final_position = 0.0;
-	_time_now = 0.0;
-	
+	_switch_time = floorf(0.5*_final_time);
 	_k_const = k_const_val1;
 	_sat_tau = sat_tau;
 	_sat_err = sat_err;
-	_switch_time = floorf(0.5*_final_time);
-
-	// For logging purposes - NOTE: could initialize this another way
-	_tau_info.tauref 	= 0.0;
-	_tau_info.taumeas 	= 0.0;
-	_tau_info.kendoul 	= 0.0;
-	_tau_info.hybrid 	= 0.0;
-	_tau_info.error 	= 0.0;
-	_tau_info.timenow 	= 0.0;
 }
 
 // Used for sending final time and k_constant value when initializing 
 void AC_TAU::operator() (float fin_time, float k_const_val)
-{ 
-	_k_const = k_const_val;
+{ 	
+	initialize_tau();
+
+	// Set new values
 	_final_time = fin_time; 
 	_switch_time = floorf(0.5*_final_time);
-
-	_final_position = 0.0;
-
-	// Set Initial values
-	_position = 0.0;
-	_velocity = 1.0; 
-	_time_now = 0.0;
-
-	// For logging purposes - NOTE: could initialize this another way
-	_tau_info.tauref 	= 0.0;
-	_tau_info.taumeas 	= 0.0;
-	_tau_info.kendoul 	= 0.0;
-	_tau_info.hybrid 	= 0.0;
-	_tau_info.error 	= 0.0;
-	_tau_info.timenow 	= 0.0;
+	_k_const = k_const_val;
 }
 
 // Overloading Used for sending final time, k_constant, and final position value when initializing 
+// 		Mainly used for tauposland and tauvelland
 void AC_TAU::operator() (float fin_time, float k_const_val, float fin_pos)
 { 
-	// Set initial parameters
-	_k_const = k_const_val;
+	initialize_tau();
+
+	// Set new values
 	_final_time = fin_time; 
 	_switch_time = floorf(0.5*_final_time);
-
+	_k_const = k_const_val;
 	_final_position = fin_pos;
+}
 
-	// Set Initial values for variables
+// Separate initialize function for operator overloading.
+void AC_TAU::initialize_tau() 
+{
+	// Set initial position values
 	_position = 0.0;
-	_velocity = 1.0;
+	_velocity = -1.0;	// to ensure negative infinity for initial tau_meas
+	_final_position = 0.0;
+
+	// Set initial params
 	_time_now = 0.0;
+	_k_const = 0.0;
 
 	// For logging purposes - NOTE: could initialize this another way
 	_tau_info.tauref 	= 0.0;
@@ -69,6 +56,8 @@ void AC_TAU::operator() (float fin_time, float k_const_val, float fin_pos)
 	_tau_info.hybrid 	= 0.0;
 	_tau_info.error 	= 0.0;
 	_tau_info.timenow 	= 0.0;
+	_tau_info.gap       = 0.0;
+	_tau_info.gaprate   = 0.0;
 }
 
 void AC_TAU::set_pos_vel_time(float position, float velocity, float time_now)
@@ -86,8 +75,10 @@ void AC_TAU::ref_tau()
 	// Definition for reference tau
 	if (_time_now < 0.1) {
 		_reference_tau = -99999.0;
+
 	} else if(_time_now < _final_time) {
 		_reference_tau = 0.5*_k_const*(_time_now - _final_time*_final_time/_time_now);
+
 	} else {
 		_reference_tau = 0.0;
 	}
@@ -104,8 +95,10 @@ void AC_TAU::meas_tau()
 	// Definition for measured tau
 	if (fabsf(_position) <= 0.02 ) {
 		_measured_tau = 0.0;
+
 	} else if (fabsf(_velocity) >= 0.05) {
 		_measured_tau = _position/_velocity;
+
 	} else {
 		float time_mod = _time_now - 0.02;
 		_measured_tau = 0.5*_k_const*(time_mod - _final_time*_final_time/time_mod);
@@ -135,6 +128,7 @@ void AC_TAU::error_tau()
 		// Hybrid Definition
 		if (_reference_tau < -1.0) {
 			_hybrid = -1.0*copysignf(1.0, _velocity)*(_reference_tau - _measured_tau)/fabsf(_reference_tau);
+
 		} else {
 			_hybrid = -1.0*copysignf(1.0, _velocity)*(_reference_tau - _measured_tau)*fabsf(_reference_tau);
 		}
@@ -187,6 +181,8 @@ void AC_TAU::update_tau()
 	_tau_info.hybrid 	= _hybrid;
 	_tau_info.error 	= _error_switch;
 	_tau_info.timenow 	= _time_now;
+	_tau_info.gap       = _position;
+	_tau_info.gaprate   = _velocity;
 }
 
 
@@ -197,11 +193,12 @@ void AC_TAU::update_reference()
 {	
 	if (_time_now < _final_time) {
 		// Values that get re-used
-		float const1 = _initial_position/pow(_final_time, 2.0/_k_const);
+		float init_pos_internal = _initial_position - _final_position;
+		float const1 = init_pos_internal/pow(_final_time, 2.0/_k_const);
 		float ftime_ctime = _final_time*_final_time - _time_now*_time_now;
 
 		// Update pos, vel and acceleration
-		_tau_position = const1*pow(ftime_ctime, 1.0/_k_const);
+		_tau_position = const1*pow(ftime_ctime, 1.0/_k_const) + _final_position; // we add final position because the output is being sent in the inertial frame... this holds true only for the vertical control. For horizontal control with non-zero approach angle this is false. 
 		_tau_velocity = -2.0*const1*_time_now/_k_const*pow(ftime_ctime, 1.0/_k_const - 1.0);
 		_tau_acceleration = 2.0*const1/_k_const*((2.0 - _k_const)/_k_const*_time_now*_time_now - _final_time*_final_time)*pow(ftime_ctime, 1.0/_k_const - 2.0);
 

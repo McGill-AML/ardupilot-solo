@@ -21,6 +21,7 @@ public:
 
 	// Operator for easy changing
 	void operator() (float fin_time, float k_const_val);
+	void operator() (float fin_time, float k_const_val, float fin_pos);
 
 	// Update reference position, velocity and acceleration
 	void update_reference();
@@ -45,13 +46,14 @@ public:
 	// output for logging purposes
 	const       DataFlash_Class::TAU_info get_tau_info(void) const { return _tau_info; }
 
-private:
+protected:
+
+	// Protected functions
 	void ref_tau();
 	void meas_tau();
 	void error_tau();
 	void error_switch_tau();
-
-protected:
+	void initialize_tau();
 
 	// Parameters
 	float		_epsilon;
@@ -71,7 +73,7 @@ protected:
 	float		_error_switch;
 
 	float 		_final_time;
-	float		_final_position; // only one variable is used for each axis
+	float		_final_position; // only used for tauposland and tauvelland (to feed correct position and velocity set points)
 	float 		_time_now;
 
 	// Reference Tau Data

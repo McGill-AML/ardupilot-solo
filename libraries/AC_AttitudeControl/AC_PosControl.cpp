@@ -946,7 +946,7 @@ float AC_PosControl::calc_leash_length(float speed_cms, float accel_cms, float k
     if(speed_cms <= accel_cms / kP) {
         // linear leash length based on speed close in
         leash_length = speed_cms / kP;
-    }else{
+    }else{ 
         // leash length grows at sqrt of speed further out
         leash_length = (accel_cms / (2.0f*kP*kP)) + (speed_cms*speed_cms / (2.0f*accel_cms));
     }
@@ -973,19 +973,6 @@ void AC_PosControl::set_velocity_control(float des_vel)
 
     _vel_target.z = des_vel*100.0;
 
-    // check speed limits
-    // To-Do: check these speed limits here or in the pos->rate controller
-    _limit.vel_up = false;
-    _limit.vel_down = false;
-    if (_vel_target.z < _speed_down_cms) {
-        _vel_target.z = _speed_down_cms;
-        _limit.vel_down = true;
-    }
-    if (_vel_target.z > _speed_up_cms) {
-        _vel_target.z = _speed_up_cms;
-        _limit.vel_up = true;
-    }
-    
     // add feed forward component
     if (_flags.enable_z_vel_ff) {
         _vel_target.z += _vel_desired.z;
@@ -993,5 +980,4 @@ void AC_PosControl::set_velocity_control(float des_vel)
 
     // call rate based throttle controller which will update accel based throttle controller targets
     rate_to_accel_z();
-
 }

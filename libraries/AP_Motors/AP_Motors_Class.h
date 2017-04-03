@@ -117,7 +117,7 @@ public:
     // set_hover_throttle - sets the mid throttle which is close to the hover throttle of the copter
     // this is used to limit the amount that the stability patch will increase the throttle to give more room for roll, pitch and yaw control
     void                set_hover_throttle(uint16_t hov_thr) { _hover_out = hov_thr; }
-
+    
     // get_hover_throttle_as_pwm - converts hover throttle to pwm (i.e. range 1000 ~ 2000)
     int16_t             get_hover_throttle_as_pwm() const;
 

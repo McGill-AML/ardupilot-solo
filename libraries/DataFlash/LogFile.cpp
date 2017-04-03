@@ -1380,6 +1380,8 @@ void DataFlash_Class::Log_Write_Tauland(int msg, const TAU_info tau)
         hybrid  : tau.hybrid,
         error   : tau.error,
         timenow : tau.timenow,
+        gap     : tau.gap,
+        gaprate : tau.gaprate
     };
     WriteBlock(&pkt, sizeof(pkt));
 }

@@ -345,6 +345,8 @@ struct PACKED log_TAU {
     float hybrid;
     float error;
     float timenow;
+    float gap;
+    float gaprate;
 };
 
 struct PACKED log_Current {
@@ -571,11 +573,11 @@ Format characters in the format string for binary log messages
     { LOG_AHR2_MSG, sizeof(log_AHRS), \
       "AHR2","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_TAUZ_MSG, sizeof(log_TAU), \
-      "TAUZ","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
+      "TAUZ","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
     { LOG_TAUX_MSG, sizeof(log_TAU), \
-      "TAUX","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
+      "TAUX","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
     { LOG_TAUY_MSG, sizeof(log_TAU), \
-      "TAUY","Iffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,ErrorSwitch,TimeNow" }, \
+      "TAUY","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
     { LOG_SIMSTATE_MSG, sizeof(log_AHRS), \
       "SIM","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_EKF1_MSG, sizeof(log_EKF1), \

@@ -694,6 +694,13 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @User: Basic
     GSCALAR(tau_time_final,  "TAU_TIME_FINAL",    10.0),
 
+    // @Param: TAU_APPROACH_ANGLE
+    // @DisplayName: Tau approach angle
+    // @Description: Approach angle for the quadcopter to land
+    // @Range: 0 100
+    // @User: Basic
+    GSCALAR(tau_approach_angle,  "TAU_APRH_ANGLE",    0.0),
+
     // @Param: TAU_Z_K_CONS
     // @DisplayName: Tau Z Const
     // @Description: K Constant for vertical landing
@@ -725,38 +732,88 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @User: Advanced
     GSCALAR(tau_target_z,  "TAU_TARGET_Z",    1.0),
     
-
     // @Param: TAU_X_K_CONS
     // @DisplayName: Tau X Const
     // @Description: K Constant for Pitch
     // @Range: 0 0.5
     // @User: Advanced
-    GSCALAR(tau_x_cons,  "TAU_X_K_CONS",    0.4),
+    GSCALAR(tau_x_cons,  "TAU_X_K_CONS",    0.0),
 
     // @Param: TAU_Y_K_CONS
     // @DisplayName: Tau Y Const
     // @Description: K Constant for Roll
     // @Range: 0 0.5
     // @User: Advanced
-    GSCALAR(tau_y_cons,  "TAU_Y_K_CONS",    0.4),
+    GSCALAR(tau_y_cons,  "TAU_Y_K_CONS",    0.0),
 
-    // @Param: TAU_Z_PID_P
-    // @DisplayName: Tau XY PID P
+    // @Param: TAU_X_PID_P
+    // @DisplayName: Tau X PID P
     // @Description: Proportional gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_xy_pid_p,  "TAU_XY_PID_P",    15.0),
+    GSCALAR(tau_x_pid_p,  "TAU_X_PID_P",    15.0),
 
-    // @Param: TAU_Z_PID_P
-    // @DisplayName: Tau XY PID I
+    // @Param: TAU_X_PID_I
+    // @DisplayName: Tau X PID I
     // @Description: Integral gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_xy_pid_i,  "TAU_XY_PID_I",    2.0),
+    GSCALAR(tau_x_pid_i,  "TAU_X_PID_I",    2.0),
+
+    // @Param: TAU_Y_PID_P
+    // @DisplayName: Tau Y PID P
+    // @Description: Proportional gain for tau horizontal motion
+    // @User: Advanced
+    GSCALAR(tau_y_pid_p,  "TAU_Y_PID_P",    15.0),
+
+    // @Param: TAU_Y_PID_I
+    // @DisplayName: Tau Y PID I
+    // @Description: Integral gain for tau horizontal motion
+    // @User: Advanced
+    GSCALAR(tau_y_pid_i,  "TAU_Y_PID_I",    2.0),
 
     // @Param: TAU_Z_PID_D
     // @DisplayName: Tau XY PID D
     // @Description: Derivative gain for tau horizontal motion
     // @User: Advanced
     GSCALAR(tau_xy_pid_d,  "TAU_XY_PID_D",    0.0),
+
+    // @Param: TAU_TARGET_X
+    // @DisplayName: Tau X target
+    // @Description: Final X position desired w.r.t. to home position in meters
+    // @User: Advanced
+    GSCALAR(tau_target_x,  "TAU_TARGET_X",    0.0),
+
+    // @Param: TAU_TARGET_Y
+    // @DisplayName: Tau Y target
+    // @Description: Final Y position desired w.r.t. to home position in meters
+    // @User: Advanced
+    GSCALAR(tau_target_y,  "TAU_TARGET_Y",    0.0),
+
+    // @Param: TAU_TARGET_PSI
+    // @DisplayName: Tau psi target
+    // @Description: Final psi position desired w.r.t. to home position in degrees
+    // @User: Advanced
+    GSCALAR(tau_target_psi,  "TAU_TARGET_PSI",    0.0),
+
+    // @Param: TAU_PSI_K_CONS
+    // @DisplayName: Tau PSI Const
+    // @Description: K Constant for Roll
+    // @Range: 0 0.5
+    // @User: Advanced
+    GSCALAR(tau_psi_cons,  "TAU_PSI_K_CONS",    0.0),
+
+    // @Param: TAU_PSI_PID_P
+    // @DisplayName: Tau PSI PID P
+    // @Description: Proportional gain for tau yaw motion
+    // @User: Advanced
+    GSCALAR(tau_psi_pid_p,  "TAU_PSI_PID_P",    0.0),
+
+    // @Param: TAU_PSI_PID_I
+    // @DisplayName: Tau PSI PID I
+    // @Description: Integral gain for tau yaw motion
+    // @User: Advanced
+    GSCALAR(tau_psi_pid_i,  "TAU_PSI_PID_I",    0.0),
+
+
 
     
     // PID controller

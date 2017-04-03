@@ -171,9 +171,13 @@ public:
         // 91: TAU Parameters
         k_param_tau_x_cons,
         k_param_tau_y_cons,
-        k_param_tau_xy_pid_p,
-        k_param_tau_xy_pid_i,
-        k_param_tau_xy_pid_d, // 95
+        k_param_tau_x_pid_p,
+        k_param_tau_x_pid_i,
+        k_param_tau_y_pid_p,
+        k_param_tau_y_pid_i,
+        k_param_tau_xy_pid_d, 
+        k_param_tau_target_x,
+        k_param_tau_target_y, // 99
 
         //
         // 100: Inertial Nav
@@ -183,6 +187,13 @@ public:
         k_param_attitude_control,
         k_param_pos_control,
         k_param_circle_nav,     // 104
+
+        // 105: TAU parameters
+        k_param_tau_approach_angle,
+        k_param_tau_psi_cons,
+        k_param_tau_psi_pid_p,
+        k_param_tau_psi_pid_i,
+        k_param_tau_target_psi,     //109        
 
         // 110: Telemetry control
         //
@@ -208,7 +219,7 @@ public:
         k_param_tau_z_pid_p,
         k_param_tau_z_pid_i,
         k_param_tau_z_pid_d,
-        k_param_tau_target_z, 
+        k_param_tau_target_z, // 130
 
         // 131: Solo parameters
         //
@@ -462,16 +473,24 @@ public:
     // Tau Landing parameters
     AP_Float                tau_x_cons;         // K Constant for x direction
     AP_Float                tau_y_cons;         // K Constant for y direction
-    AP_Float                tau_xy_pid_p;       // Proportional control for xy direction
-    AP_Float                tau_xy_pid_i;       // Integral control for xy direction
+    AP_Float                tau_x_pid_p;        // Proportional control for xy direction
+    AP_Float                tau_x_pid_i;        // Integral control for xy direction
+    AP_Float                tau_y_pid_p;        // Proportional control for xy direction
+    AP_Float                tau_y_pid_i;        // Integral control for xy direction
     AP_Float                tau_xy_pid_d;       // Derivative control for xy direction
     AP_Float                tau_time_final;     // Final time used for tau landing
     AP_Float                tau_z_cons;         // K Constant for z direction
     AP_Float                tau_z_pid_p;        // Proportional control for z direction
     AP_Float                tau_z_pid_i;        // Integral control for z direction
     AP_Float                tau_z_pid_d;        // Derivative control for z direction
-    AP_Float                tau_target_z;
-
+    AP_Float                tau_target_x;       // target x position
+    AP_Float                tau_target_y;       // target y position
+    AP_Float                tau_target_z;       // target z position
+    AP_Float                tau_target_psi;     // target psi 
+    AP_Float                tau_psi_cons;;      // K constant for psi 
+    AP_Float                tau_psi_pid_p;      // Proportional control for psi
+    AP_Float                tau_psi_pid_i;      // Integral control for psi
+    AP_Float                tau_approach_angle; // final approach angle for quadcopter    
 
 #if FRAME_CONFIG ==     HELI_FRAME
     // Heli

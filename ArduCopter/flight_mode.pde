@@ -337,6 +337,9 @@ static void notify_flight_mode(uint8_t mode) {
         case GUIDED:
         case RTL:
         case CIRCLE:
+        case TAULAND:
+        case TAUPOSLAND:
+        case TAUVELLAND:
         case LAND:
             // autopilot modes
             AP_Notify::flags.autopilot_mode = true;

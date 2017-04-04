@@ -1367,11 +1367,10 @@ void DataFlash_Class::Log_Write_Airspeed(AP_Airspeed &airspeed)
     WriteBlock(&pkt, sizeof(pkt));
 }
 
-// Write tau land packet, currently only for z direction
-// void DataFlash_Class::Log_Write_Tauland(AC_TAU &tau)
-void DataFlash_Class::Log_Write_Tauland(int msg, const TAU_info tau)
+// Write tau land packet for x,y,z direction
+void DataFlash_Class::Log_Write_Tauland(int msg, const Tau_info tau)
 {
-    struct log_TAU pkt = {
+    struct log_Tau pkt = {
         LOG_PACKET_HEADER_INIT(msg),
         time_ms : hal.scheduler->millis(),
         tauref  : tau.tauref,
@@ -1385,3 +1384,24 @@ void DataFlash_Class::Log_Write_Tauland(int msg, const TAU_info tau)
     };
     WriteBlock(&pkt, sizeof(pkt));
 }
+
+// Write tau land packet for additional logging from x,y direction
+void DataFlash_Class::Log_Write_Tauland2(const Tau_info2 tau2)
+{
+    struct log_Tau2 pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_TAU_INFO2_MSG),
+        time_ms             : hal.scheduler->millis(),
+        cos_ap              : tau2.cos_ap,
+        sin_ap              : tau2.sin_ap,
+        alpha_approach      : tau2.alpha_approach,
+        alpha_0_approach    : tau2.alpha_0_approach,
+        beta_approach       : tau2.beta_approach,
+        roll                : tau2.roll,
+        pitch               : tau2.pitch,
+        psi                 : tau2.psi, 
+        ext1                : tau2.ext1,
+        ext2                : tau2.ext2
+    };
+    WriteBlock(&pkt, sizeof(pkt));
+}
+

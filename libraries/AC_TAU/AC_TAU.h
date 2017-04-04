@@ -44,7 +44,7 @@ public:
 	void initial_position(float v)	{ _initial_position = v; }
 
 	// output for logging purposes
-	const       DataFlash_Class::TAU_info get_tau_info(void) const { return _tau_info; }
+	const       DataFlash_Class::Tau_info get_tau_info(void) const { return _tau_info; }
 
 protected:
 
@@ -83,7 +83,7 @@ protected:
 	float 		_initial_position;
 
 	// Logging purposes
-	DataFlash_Class::TAU_info        _tau_info;
+	DataFlash_Class::Tau_info        _tau_info;
 
 };
 

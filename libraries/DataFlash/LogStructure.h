@@ -336,7 +336,7 @@ struct PACKED log_Attitude {
     uint16_t error_yaw;
 };
 
-struct PACKED log_TAU {
+struct PACKED log_Tau {
     LOG_PACKET_HEADER;
     uint32_t time_ms;
     float tauref;
@@ -347,6 +347,21 @@ struct PACKED log_TAU {
     float timenow;
     float gap;
     float gaprate;
+};
+
+struct PACKED log_Tau2 {
+    LOG_PACKET_HEADER;
+    uint32_t time_ms;
+    float cos_ap;
+    float sin_ap;
+    float alpha_approach;
+    float alpha_0_approach;
+    float beta_approach;
+    float roll;
+    float pitch;
+    float psi;
+    float ext1;     // extra space for additional logs
+    float ext2;
 };
 
 struct PACKED log_Current {
@@ -572,12 +587,14 @@ Format characters in the format string for binary log messages
       "IMU3",  "IffffffIIf",     "TimeMS,GyrX,GyrY,GyrZ,AccX,AccY,AccZ,ErrG,ErrA,Temp" }, \
     { LOG_AHR2_MSG, sizeof(log_AHRS), \
       "AHR2","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
-    { LOG_TAUZ_MSG, sizeof(log_TAU), \
+    { LOG_TAUZ_MSG, sizeof(log_Tau), \
       "TAUZ","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
-    { LOG_TAUX_MSG, sizeof(log_TAU), \
+    { LOG_TAUX_MSG, sizeof(log_Tau), \
       "TAUX","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
-    { LOG_TAUY_MSG, sizeof(log_TAU), \
+    { LOG_TAUY_MSG, sizeof(log_Tau), \
       "TAUY","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
+    { LOG_TAU_INFO2_MSG, sizeof(log_Tau2), \
+      "TAUY","I","TimeMS,cAP,sAP,Alpha,Alpha0,Beta,RollD,PitchD,Psi,Ext1,Ext2" }, \
     { LOG_SIMSTATE_MSG, sizeof(log_AHRS), \
       "SIM","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_EKF1_MSG, sizeof(log_EKF1), \
@@ -717,7 +734,8 @@ Format characters in the format string for binary log messages
 #define LOG_R10CGIMBAL_MSG 186
 #define LOG_TAUZ_MSG      187
 #define LOG_TAUX_MSG      188
-#define LOG_TAUY_MSG      189     
+#define LOG_TAUY_MSG      189
+#define LOG_TAU_INFO2_MSG 190     
 
 // message types 200 to 210 reversed for GPS driver use
 // message types 211 to 220 reversed for autotune use

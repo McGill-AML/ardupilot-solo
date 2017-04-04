@@ -108,7 +108,7 @@ public:
     bool logging_started(void);
 
     // Structure provides information on the internal member data of tau
-    struct TAU_info {
+    struct Tau_info {
         float tauref;
         float taumeas;
         float kendoul;
@@ -119,8 +119,23 @@ public:
         float gaprate;
     };
 
-    // void Log_Write_Tauland(const TAU_info tau);
-    void Log_Write_Tauland(int msg, const TAU_info tau);
+    void Log_Write_Tauland(int msg, const Tau_info tau);
+
+    // Structure provides additional information from tau horizontal
+    struct Tau_info2 {
+        float cos_ap;
+        float sin_ap;
+        float alpha_approach;
+        float alpha_0_approach;
+        float beta_approach;
+        float roll;
+        float pitch;
+        float psi;
+        float ext1;     // extra space for additional logs
+        float ext2;
+    };
+
+    void Log_Write_Tauland2(const Tau_info2 tau2);
 
     // for DataFlash_MAVLink:
     void remote_log_block_status_msg(mavlink_channel_t chan,

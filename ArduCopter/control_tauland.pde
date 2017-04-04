@@ -199,7 +199,8 @@ static void tau_land_run_vertical_control(bool pause_descent)
     }
 
     // get position z in target frame
-    position_z = inertial_nav.get_altitude()/100.0 - g.tau_target_z; // (m) --> to land 1.0 m above the ground
+    // position_z = inertial_nav.get_altitude()/100.0 - g.tau_target_z; // the inav position estimate drifts a lot
+    position_z = current_loc.alt/100.0 - g.tau_target_z; // (m) --> to land 1.0 m above the ground
 
     // Tau object
     tau_z.set_pos_vel_time(position_z, velocity_z, time_now);
@@ -322,6 +323,14 @@ static void tau_land_run_horizontal_control()
     float pos_t_x =  cos(alpha_approach)*(position_x - g.tau_target_x) + sin(alpha_approach)*(position_y - g.tau_target_y);
     float pos_t_y = -sin(alpha_approach)*(position_x - g.tau_target_x) + cos(alpha_approach)*(position_y - g.tau_target_y);
 
+    if (fabsf(pos_t_x) < 0.1) {
+        pos_t_x = 0.0;
+    }
+
+    if (fabsf(pos_t_y) < 0.1) {
+        pos_t_y = 0.0;
+    }
+
     // Convert velocity to target frame
     float vel_t_x =  cos(alpha_approach)*(velocity_x) + sin(alpha_approach)*(velocity_y);
     float vel_t_y = -sin(alpha_approach)*(velocity_x) + cos(alpha_approach)*(velocity_y);
@@ -381,14 +390,25 @@ static void tau_land_run_horizontal_control()
         set_mode(STOP);
     }
 
-    // Log Data
+    // Log Data - Declared in Arducopter.pde
     tau_x_info = tau_x.get_tau_info();
     tau_y_info = tau_y.get_tau_info();
 
-    float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
-    float roll_actual = pos_control.get_roll();
+    tau_xy_log.cos_ap = cos_ap;
+    tau_xy_log.sin_ap = sin_ap;
+    tau_xy_log.alpha_approach = alpha_approach;
+    tau_xy_log.alpha_0_approach = alpha_0_approach;
+    tau_xy_log.beta_approach = beta_approach;
+    tau_xy_log.roll = roll;
+    tau_xy_log.pitch = pitch;
+    tau_xy_log.psi = psi;
+    tau_xy_log.ext1 = 0.0;
+    tau_xy_log.ext2 = 0.0;
 
     // Print to screen
+    // float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
+    // float roll_actual = pos_control.get_roll();
+
     // hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
     // hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
     // hal.console->printf("cos_ap: %3.3f, sin_ap: %3.3f, alpha_approach: %3.3f, beta_approach: %3.3f, psi: %3.3f, pos_t_x: %3.3f, pos_t_y: %3.3f, vel_t_x: %3.3f, vel_t_y: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);

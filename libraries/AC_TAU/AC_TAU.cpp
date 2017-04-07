@@ -49,6 +49,9 @@ void AC_TAU::initialize_tau()
 	_time_now = 0.0;
 	_k_const = 0.0;
 
+	_min_allowed_pos = 0.05; //0.02
+	_min_allowed_vel = 0.1;  //0.05 
+
 	// For logging purposes - NOTE: could initialize this another way
 	_tau_info.tauref 	= 0.0;
 	_tau_info.taumeas 	= 0.0;
@@ -93,10 +96,10 @@ void AC_TAU::ref_tau()
 void AC_TAU::meas_tau()
 {	
 	// Definition for measured tau
-	if (fabsf(_position) <= 0.02 ) {
+	if (fabsf(_position) <= _min_allowed_pos ) {
 		_measured_tau = 0.0;
 
-	} else if (fabsf(_velocity) >= 0.05) {
+	} else if (fabsf(_velocity) >= _min_allowed_vel) {
 		_measured_tau = _position/_velocity;
 
 	} else {

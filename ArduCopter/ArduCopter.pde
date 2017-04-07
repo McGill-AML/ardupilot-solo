@@ -754,10 +754,11 @@ static bool pre_arm_checks(bool display_failure);
 ////////////////////////////////////////////////////////////////////////////////
 // Tau variables for logging
 ////////////////////////////////////////////////////////////////////////////////
-DataFlash_Class::Tau_info tau_z_info;
-DataFlash_Class::Tau_info tau_x_info;
-DataFlash_Class::Tau_info tau_y_info;
-DataFlash_Class::Tau_info2 tau_xy_log;
+static DataFlash_Class::Tau_info tau_z_info;
+static DataFlash_Class::Tau_info tau_x_info;
+static DataFlash_Class::Tau_info tau_y_info;
+static DataFlash_Class::Tau_info tau_yaw_info;
+static DataFlash_Class::Tau_info2 tau_xy_log;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Top-level logic

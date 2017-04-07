@@ -61,6 +61,8 @@ protected:
 	float 		_sat_tau;
 	float		_sat_err;
 	float 		_switch_time;
+	float 		_min_allowed_pos;
+	float		_min_allowed_vel;
 
 	// Variables
 	float 		_position;

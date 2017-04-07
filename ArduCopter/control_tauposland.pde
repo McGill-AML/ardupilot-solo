@@ -8,28 +8,6 @@
 
 static uint32_t tauposland_start_time;
 static float land_final_time; // final time for landing; should be a parameter
-// static float time_now;        // current time for tau control   
-
-// static bool land_pause;
-
-// static float position_z;
-// static float velocity_z;
-
-// /// PID Law
-// // PID setup
-// static float tau_p = 0.0;
-// static float tau_i = 0.0;
-// static float tau_d = 0.0;
-// static float tau_imax = 25.0;
-// static float tau_filter = 5.0;
-// static float tau_dt = 0.0025;
-
-// // declare pid block
-// static AC_PID tau_pid_z(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
-
-// // Tau object
-// static AC_TAU tau_z(0.0, 0.0, 100.0, 1.0); 
-
 
 // land_init - initialise land controller
 static bool tauposland_init(bool ignore_checks)

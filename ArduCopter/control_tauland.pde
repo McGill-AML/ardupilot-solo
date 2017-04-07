@@ -27,10 +27,10 @@ static float velocity_y;
 static float tau_control_input;
 static int count_landed;
 
+// Approach Angle
 static float beta_approach; // approach angled from the vehicle perspective
 static float alpha_0_approach; // initial approach angle using planar position
 static float alpha_approach; // approach angle used 
-
 static float cos_ap, sin_ap;
 
 // Saturations / Constrains
@@ -49,18 +49,22 @@ static float hov_thr_default;
 // declare pid block
 static AC_PID tau_pid_z(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
 static AC_PID tau_pid_x(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
-static AC_PID tau_pid_y(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
+static AC_PID tau_pid_y(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt);
+static AC_PID tau_pid_yaw(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
 
 // Tau object
 static AC_TAU tau_z(0.0, 0.0, sat_tau_meas, sat_tau_err); 
 static AC_TAU tau_x(0.0, 0.0, sat_tau_meas, sat_tau_err); 
-static AC_TAU tau_y(0.0, 0.0, sat_tau_meas, sat_tau_err); 
+static AC_TAU tau_y(0.0, 0.0, sat_tau_meas, sat_tau_err);
+static AC_TAU tau_yaw(0.0, 0.0, sat_tau_meas, sat_tau_err);
 
 // Landing Case
 enum TauLandMode {
     TAU_VERTICAL_TAU_HORIZONTAL,
     TAU_VERTICAL_HOLD_HORIZONTAL,
-    HOLD_VERTICAL_TAU_HORIZONTAL
+    HOLD_VERTICAL_TAU_HORIZONTAL,
+    TAU_VERTICAL_TAU_HORIZONTAL_TAU_YAW,
+    HOLD_VERTICAL_TAU_HORIZONTAL_TAU_YAW,
 } tau_land_mode;
 
 // land_init - initialise land controller
@@ -87,6 +91,7 @@ static bool tauland_init(bool ignore_checks)
     tau_z(g.tau_time_final, g.tau_z_cons);
     tau_x(g.tau_time_final, g.tau_x_cons);
     tau_y(g.tau_time_final, g.tau_y_cons);
+    tau_yaw(g.tau_time_final, g.tau_psi_cons);
 
     // Initialize PID to the correct values
     tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, tau_imax, tau_filter, tau_dt);
@@ -98,13 +103,16 @@ static bool tauland_init(bool ignore_checks)
     tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
     tau_pid_y.reset_filter();
 
+    tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
+    tau_pid_yaw.reset_filter();
+
+    // Store hover initial value
     hov_thr_default = pos_control.get_throttle_hover();
 
     // Approach angle relative to vector joining the initial and target
     beta_approach = g.tau_approach_angle*PI/180.0; // rad
     alpha_0_approach = fast_atan2(inertial_nav.get_position().y, inertial_nav.get_position().x);
     alpha_approach = alpha_0_approach + beta_approach;
-    // hal.console->printf("alpha_0_approach: %3.3f, alpha_0_normal: %3.3f, pos_y: %3.3f, pos_x: %3.3f \n", alpha_0_approach, atan2(inertial_nav.get_position().y, inertial_nav.get_position().x), inertial_nav.get_position().y, inertial_nav.get_position().x);
 
     // Set the desired tau land mode
     if (g.tau_z_cons == 0.0) {
@@ -183,9 +191,11 @@ static void tauland_gps_run()
 // Vertical controller for tau landing called from myland_run()
 //      also checks if we have landed.
 static void tau_land_run_vertical_control(bool pause_descent)
-{
-    /// TAU CONTROL SECTION 
- 
+{   
+    ///////////////////////////
+    /// TAU CONTROL SECTION ///
+    ///////////////////////////
+
     // get current time    
     time_now = millis()*0.001f - tauland_start_time*0.001f; // (s), getting converted to a float 
 
@@ -231,10 +241,8 @@ static void tau_land_run_vertical_control(bool pause_descent)
     tau_thr_out = constrain_float(tau_thr_out, pos_control.get_throttle_hover()*0.8, pos_control.get_throttle_hover()*1.05);
 
     attitude_control.set_throttle_out(tau_thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);
-
     
     // check to see if we have landed
-    // this assumes that we are on the ground even if we are not fully landed. i.e. we are going from 10m -> 5m
     if (time_now >= tau_z.final_time()+0.5) {   
         if (count_landed > 5 and inertial_nav.get_altitude() < 15.0) {
             set_mode(LAND);
@@ -247,6 +255,9 @@ static void tau_land_run_vertical_control(bool pause_descent)
     // Logging the data
     tau_z_info = tau_z.get_tau_info();
 
+    tau_xy_log.ext1 = tau_control_updated;
+    tau_xy_log.ext2 = pos_control.get_throttle_hover();
+
     /// PRINT TO SCREEN:
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, thr_out: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, tau_z.kendoul(), tau_z.hybrid(), motors.get_throttle_hover(), tau_control_updated);
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov_pos: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
@@ -257,40 +268,6 @@ static void tau_land_run_vertical_control(bool pause_descent)
 // Horizontal controller for tau landing called from myland_run()
 static void tau_land_run_horizontal_control()
 {
-    int16_t roll_control = 0, pitch_control = 0;
-    float target_yaw_rate = 0;
-
-    // process pilot inputs
-    if (!failsafe.radio) {
-        if(rc_throttle_control_in_filter.get() > 700){
-            // exit land
-            if (position_ok()) {
-                set_mode(LOITER);                
-            } else {
-                set_mode(ALT_HOLD);
-            }
-        }
-
-        if (g.land_repositioning) {
-            // apply SIMPLE mode transform to pilot inputs
-            update_simple_mode();
-
-            // process pilot's roll and pitch input
-            roll_control = g.rc_1.control_in;
-            pitch_control = g.rc_2.control_in;
-        }
-
-        // get pilot's desired yaw rate
-        target_yaw_rate = get_pilot_desired_yaw_rate(g.rc_4.control_in);
-    }
-
-    // process roll, pitch inputs
-    wp_nav.set_pilot_desired_acceleration(roll_control, pitch_control);
-
-    // run loiter controller
-    wp_nav.update_loiter(ekfGndSpdLimit, ekfNavVelGainScaler);
-
-
     /////////////////////////////////
     //// TAU CONTROL STARTS HERE ////
     /////////////////////////////////
@@ -323,14 +300,6 @@ static void tau_land_run_horizontal_control()
     float pos_t_x =  cos(alpha_approach)*(position_x - g.tau_target_x) + sin(alpha_approach)*(position_y - g.tau_target_y);
     float pos_t_y = -sin(alpha_approach)*(position_x - g.tau_target_x) + cos(alpha_approach)*(position_y - g.tau_target_y);
 
-    if (fabsf(pos_t_x) < 0.1) {
-        pos_t_x = 0.0;
-    }
-
-    if (fabsf(pos_t_y) < 0.1) {
-        pos_t_y = 0.0;
-    }
-
     // Convert velocity to target frame
     float vel_t_x =  cos(alpha_approach)*(velocity_x) + sin(alpha_approach)*(velocity_y);
     float vel_t_y = -sin(alpha_approach)*(velocity_x) + cos(alpha_approach)*(velocity_y);
@@ -344,12 +313,7 @@ static void tau_land_run_horizontal_control()
         tau_y.set_pos_vel_time(position_y, velocity_y, time_now);
     }
 
-    // tau_x.set_pos_vel_time(pos_t_x, vel_t_x, time_now);
-    // tau_x.set_pos_vel_time(position_x, velocity_x, time_now);
     tau_x.update_tau();
-
-    // tau_y.set_pos_vel_time(pos_t_y, vel_t_y, time_now);
-    // tau_y.set_pos_vel_time(position_y, velocity_y, time_now);
     tau_y.update_tau();
 
     // Error calculation
@@ -359,7 +323,7 @@ static void tau_land_run_horizontal_control()
     tau_pid_y.set_input_filter_d(error_y);
 
     // Approach angle
-    float psi = constrain_float(ahrs.yaw, -PI, PI); // Because sometimes the value of psi goes over 100
+    float psi = wrap_PI(ahrs.yaw); // Because sometimes the value of psi goes over 100
 
     if (g.tau_psi_cons == 0.0) {
         cos_ap = cos(alpha_approach - psi);
@@ -382,15 +346,17 @@ static void tau_land_run_horizontal_control()
     ///////////////////////////////
  
 
-    // call attitude controller
-    attitude_control.angle_ef_roll_pitch_rate_ef_yaw (roll, pitch, target_yaw_rate);
+    // Call attitude controller 
+    // TO DO: replace the following function call with tau_land_run_yaw_control()
+    //        because it will be the only function that calls the attitude_control obj
+    attitude_control.angle_ef_roll_pitch_rate_ef_yaw(roll, pitch, 0.0);
 
     // To make sure I get control back 
     if (time_now >= tauland_final_time+1.0) {
         set_mode(STOP);
     }
 
-    // Log Data - Declared in Arducopter.pde
+    // Log Data - Declared in Arducopter
     tau_x_info = tau_x.get_tau_info();
     tau_y_info = tau_y.get_tau_info();
 
@@ -402,8 +368,8 @@ static void tau_land_run_horizontal_control()
     tau_xy_log.roll = roll;
     tau_xy_log.pitch = pitch;
     tau_xy_log.psi = psi;
-    tau_xy_log.ext1 = 0.0;
-    tau_xy_log.ext2 = 0.0;
+    // tau_xy_log.ext1 = 0.0; // Called in tau_vertical
+    // tau_xy_log.ext2 = 0.0;
 
     // Print to screen
     // float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
@@ -412,6 +378,58 @@ static void tau_land_run_horizontal_control()
     // hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
     // hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
     // hal.console->printf("cos_ap: %3.3f, sin_ap: %3.3f, alpha_approach: %3.3f, beta_approach: %3.3f, psi: %3.3f, pos_t_x: %3.3f, pos_t_y: %3.3f, vel_t_x: %3.3f, vel_t_y: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);
+}
+
+// Psi controller using tau 
+static void tau_land_run_yaw_control(float roll, float pitch)
+{   
+    // Call tau_land_run_yaw_control from tau_land_run_horizontal, passing roll, and pitch
+    //  This function will then call the attitude controller. This keeps both of the horizontal
+    //  and yaw control separate (and hopefully neater). 
+    if (g.tau_psi_cons == 0.0){
+        attitude_control.angle_ef_roll_pitch_rate_ef_yaw(roll, pitch, 0.0);
+        return;
+    }
+
+    // Initializtions
+    Vector3f euler;
+    float yaw;
+    float yaw_rate;
+
+    ///////////////////////////
+    /// TAU CONTROL SECTION ///
+    ///////////////////////////
+
+    // Get time now
+    time_now = millis()*0.001f - tauland_start_time*0.001f;
+
+    // Get yaw
+    if (!ahrs.get_secondary_attitude(euler)) {
+        ahrs.get_NavEKF().getEulerAngles(euler);    // get yaw from either get_secondary or getEulerAngles
+    }
+    yaw = wrap_PI(euler.z); // radians
+    
+    // Get yaw rate
+    yaw_rate = ahrs.get_gyro_for_control().z;       // Returned in body frame radians/s
+
+    // Tau object
+    tau_yaw.set_pos_vel_time(yaw, yaw_rate, time_now);
+    tau_yaw.update_tau();
+
+    // Tau PID
+    float error = tau_yaw.error_switch();
+    tau_pid_yaw.set_input_filter_d(error);
+    float yaw_control = tau_pid_yaw.get_pid();
+
+    ///////////////////////////
+    /// TAU CONTROL SECTION ///
+    ///////////////////////////
+
+    // Send Commands
+    attitude_control.angle_ef_roll_pitch_rate_ef_yaw(roll, pitch, yaw_control);
+
+    // Log Data
+    tau_yaw_info = tau_yaw.get_tau_info();
 }
 
 // Horizontal controller to hold horizontal position (copied from control_land in newer versions)

@@ -63,6 +63,12 @@ void AC_TAU::initialize_tau()
 	_tau_info.gaprate   = 0.0;
 }
 
+void AC_TAU::set_minpos_minvel(float min_pos, float min_vel)
+{
+	_min_allowed_pos = min_pos
+	_min_allowed_vel = min_vel;
+}
+
 void AC_TAU::set_pos_vel_time(float position, float velocity, float time_now)
 {	
 	// The position and velocity being fed in here should be in the target frame!

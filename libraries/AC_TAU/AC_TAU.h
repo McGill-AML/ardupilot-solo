@@ -23,6 +23,9 @@ public:
 	void operator() (float fin_time, float k_const_val);
 	void operator() (float fin_time, float k_const_val, float fin_pos);
 
+	// To change the min allowed position and min allowed velocity in the TAU Measured calculation
+	void set_minpos_minvel(float min_pos, float min_vel);
+
 	// Update reference position, velocity and acceleration
 	void update_reference();
 	float get_tau_position() 		{ return _tau_position; }

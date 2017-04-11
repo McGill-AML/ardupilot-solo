@@ -89,6 +89,8 @@ static bool tauland_init(bool ignore_checks)
 
     // Tau object
     tau_z(g.tau_time_final, g.tau_z_cons);
+    tau_z.set_minpos_minvel(0.02, 0.05);
+
     tau_x(g.tau_time_final, g.tau_x_cons);
     tau_y(g.tau_time_final, g.tau_y_cons);
     tau_yaw(g.tau_time_final, g.tau_psi_cons);
@@ -235,10 +237,14 @@ static void tau_land_run_vertical_control(bool pause_descent)
     // Multiply by a constant and get the correct sign
     float tau_control_updated = -1.0*tau_control_input*10.0;
 
+    ///////////////////////////
+    /// TAU CONTROL SECTION ///
+    ///////////////////////////
+    
     /// SEND COMMANDS
     float thr_scaling = pos_control.get_throttle_hover()/hov_thr_default;
     float tau_thr_out = tau_control_updated*thr_scaling + pos_control.get_throttle_hover(); // in the range 0~1 (from AP_MotorsMulticopter.h)
-    tau_thr_out = constrain_float(tau_thr_out, pos_control.get_throttle_hover()*0.8, pos_control.get_throttle_hover()*1.05);
+    tau_thr_out = constrain_float(tau_thr_out, pos_control.get_throttle_hover()*0.9, pos_control.get_throttle_hover()*1.05);
 
     attitude_control.set_throttle_out(tau_thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);
     
@@ -372,12 +378,12 @@ static void tau_land_run_horizontal_control()
     // tau_xy_log.ext2 = 0.0;
 
     // Print to screen
-    // float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
-    // float roll_actual = pos_control.get_roll();
+    float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
+    float roll_actual = pos_control.get_roll();
 
-    // hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
-    // hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
-    // hal.console->printf("cos_ap: %3.3f, sin_ap: %3.3f, alpha_approach: %3.3f, beta_approach: %3.3f, psi: %3.3f, pos_t_x: %3.3f, pos_t_y: %3.3f, vel_t_x: %3.3f, vel_t_y: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);
+    hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
+    hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
+    hal.console->printf("cos_ap: %3.3f, sin_ap: %3.3f, alpha_approach: %3.3f, beta_approach: %3.3f, psi: %3.3f, pos_t_x: %3.3f, pos_t_y: %3.3f, vel_t_x: %3.3f, vel_t_y: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);
 }
 
 // Psi controller using tau 

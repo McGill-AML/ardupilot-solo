@@ -594,7 +594,7 @@ Format characters in the format string for binary log messages
     { LOG_TAUY_MSG, sizeof(log_Tau), \
       "TAUY","Iffffffff","TimeMS,TauRef,TauMeas,Kendoul,Hybrid,Err,TimeNow,Gap,GapRate" }, \
     { LOG_TAU_INFO2_MSG, sizeof(log_Tau2), \
-      "TAUY","I","TimeMS,cAP,sAP,Alpha,Alpha0,Beta,RollD,PitchD,Psi,Ext1,Ext2" }, \
+      "TAU2","Iffffffffff","TimeMS,cAP,sAP,Alpha,Alpha0,Beta,RollD,PitchD,Psi,Ext1,Ext2" }, \
     { LOG_SIMSTATE_MSG, sizeof(log_AHRS), \
       "SIM","IccCfLL","TimeMS,Roll,Pitch,Yaw,Alt,Lat,Lng" }, \
     { LOG_EKF1_MSG, sizeof(log_EKF1), \

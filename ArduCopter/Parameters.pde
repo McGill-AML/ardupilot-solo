@@ -712,13 +712,13 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @DisplayName: Tau Z PID P
     // @Description: Proportional gain for tau vertical landing
     // @User: Advanced
-    GSCALAR(tau_z_pid_p,  "TAU_Z_PID_P",    40.0),
+    GSCALAR(tau_z_pid_p,  "TAU_Z_PID_P",    20.0),
 
     // @Param: TAU_Z_PID_P
     // @DisplayName: Tau Z PID I
     // @Description: Integral gain for tau vertical landing
     // @User: Advanced
-    GSCALAR(tau_z_pid_i,  "TAU_Z_PID_I",    8.0),
+    GSCALAR(tau_z_pid_i,  "TAU_Z_PID_I",    10.0),
 
     // @Param: TAU_Z_PID_D
     // @DisplayName: Tau Z PID D
@@ -750,25 +750,25 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @DisplayName: Tau X PID P
     // @Description: Proportional gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_x_pid_p,  "TAU_X_PID_P",    15.0),
+    GSCALAR(tau_x_pid_p,  "TAU_X_PID_P",    5.0),
 
     // @Param: TAU_X_PID_I
     // @DisplayName: Tau X PID I
     // @Description: Integral gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_x_pid_i,  "TAU_X_PID_I",    2.0),
+    GSCALAR(tau_x_pid_i,  "TAU_X_PID_I",    1.0),
 
     // @Param: TAU_Y_PID_P
     // @DisplayName: Tau Y PID P
     // @Description: Proportional gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_y_pid_p,  "TAU_Y_PID_P",    15.0),
+    GSCALAR(tau_y_pid_p,  "TAU_Y_PID_P",    5.0),
 
     // @Param: TAU_Y_PID_I
     // @DisplayName: Tau Y PID I
     // @Description: Integral gain for tau horizontal motion
     // @User: Advanced
-    GSCALAR(tau_y_pid_i,  "TAU_Y_PID_I",    2.0),
+    GSCALAR(tau_y_pid_i,  "TAU_Y_PID_I",    1.0),
 
     // @Param: TAU_Z_PID_D
     // @DisplayName: Tau XY PID D
@@ -805,7 +805,7 @@ const AP_Param::Info var_info[] PROGMEM = {
     // @DisplayName: Tau PSI PID P
     // @Description: Proportional gain for tau yaw motion
     // @User: Advanced
-    GSCALAR(tau_psi_pid_p,  "TAU_PSI_PID_P",    0.0),
+    GSCALAR(tau_psi_pid_p,  "TAU_PSI_PID_P",    4.0),
 
     // @Param: TAU_PSI_PID_I
     // @DisplayName: Tau PSI PID I

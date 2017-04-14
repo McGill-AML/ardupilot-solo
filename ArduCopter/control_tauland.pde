@@ -87,22 +87,26 @@ static bool tauland_init(bool ignore_checks)
     tauland_pause = false;
     count_landed = 0;
 
-    // Tau object
+    // Initialize Tau objects
     tau_z(g.tau_time_final, g.tau_z_cons);
-    tau_z.set_minpos_minvel(0.02, 0.05);
+    // tau_z.set_minpos_minvel(0.02, 0.02);
 
     tau_x(g.tau_time_final, g.tau_x_cons);
+    tau_x.set_minpos_minvel(0.02, g.tau_psi_pid_i);
+
     tau_y(g.tau_time_final, g.tau_y_cons);
+    tau_y.set_minpos_minvel(0.02, g.tau_psi_pid_i);
+
     tau_yaw(g.tau_time_final, g.tau_psi_cons);
 
     // Initialize PID to the correct values
-    tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, tau_imax, tau_filter, tau_dt);
+    tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
     tau_pid_z.reset_filter();
 
-    tau_pid_x(g.tau_x_pid_p, g.tau_x_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
+    tau_pid_x(g.tau_x_pid_p, g.tau_x_pid_i, g.tau_xy_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
     tau_pid_x.reset_filter();
 
-    tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
+    tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
     tau_pid_y.reset_filter();
 
     tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
@@ -228,6 +232,13 @@ static void tau_land_run_vertical_control(bool pause_descent)
     // PID SECTION
     // set Error
     float error = tau_z.error_switch();
+    if (g.tau_target_psi == 1.0) {
+        error = tau_z.kendoul();
+    } else if (g.tau_target_psi = 2.0) {
+        error = tau_z.hybrid();
+    } else if (g.tau_target_psi = 3.0) {
+        error = tau_z.error_inverse();
+    }
     tau_pid_z.set_input_filter_d(error);
     
     // get pid error out. Note sometimes it is neceassy to reset the i flags? and sometimes you call them separately. 
@@ -242,17 +253,18 @@ static void tau_land_run_vertical_control(bool pause_descent)
     ///////////////////////////
     
     /// SEND COMMANDS
-    float thr_scaling = pos_control.get_throttle_hover()/hov_thr_default;
-    float tau_thr_out = tau_control_updated*thr_scaling + pos_control.get_throttle_hover(); // in the range 0~1 (from AP_MotorsMulticopter.h)
-    tau_thr_out = constrain_float(tau_thr_out, pos_control.get_throttle_hover()*0.9, pos_control.get_throttle_hover()*1.05);
+    // float thr_scaling = pos_control.get_throttle_hover()/hov_thr_default;
+    // float tau_thr_out = tau_control_updated + hov_thr_default; // in the range 0~1 (from AP_MotorsMulticopter.h)
+    float tau_thr_out = tau_control_updated + pos_control.get_throttle_hover();
+    tau_thr_out = constrain_float(tau_thr_out, hov_thr_default*0.8, hov_thr_default*2.5);
 
-    attitude_control.set_throttle_out(tau_thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);
+    attitude_control.set_throttle_out(tau_thr_out, true,  POSCONTROL_THROTTLE_CUTOFF_FREQ);
     
     // check to see if we have landed
     if (time_now >= tau_z.final_time()+0.5) {   
-        if (count_landed > 5 and inertial_nav.get_altitude() < 15.0) {
+        if (count_landed > 5 and current_loc.alt < 15.0) {
             set_mode(LAND);
-        } else if (count_landed > 5) {
+        } else if (count_landed > 6) {
             set_mode(STOP);
         }
         count_landed++;
@@ -262,13 +274,10 @@ static void tau_land_run_vertical_control(bool pause_descent)
     tau_z_info = tau_z.get_tau_info();
 
     tau_xy_log.ext1 = tau_control_updated;
-    tau_xy_log.ext2 = pos_control.get_throttle_hover();
 
     /// PRINT TO SCREEN:
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, thr_out: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, tau_z.kendoul(), tau_z.hybrid(), motors.get_throttle_hover(), tau_control_updated);
-    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov_pos: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
-    // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f, thr_in: %3.3f, thr_upd: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid(), tau_control_input, tau_control_updated);
-    // hal.console->printf("get_p: %3.3f, get_i: %3.3f, get_pid: %3.3f \n", tau_pid_z.get_p(), tau_pid_z.get_i(), tau_pid_z.get_pid());   
+    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov_thr: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
 }
 
 // Horizontal controller for tau landing called from myland_run()
@@ -436,6 +445,9 @@ static void tau_land_run_yaw_control(float roll, float pitch)
 
     // Log Data
     tau_yaw_info = tau_yaw.get_tau_info();
+
+    // Print to screen
+    hal.console->printf("time: %3.3f, yaw: %3.3f, yaw_rate: %3.3f, tau_yaw_meas: %3.3f, tau_yaw_ref: %3.3f, err: %3.3f, control_input: %3.3f \n", time_now, yaw, yaw_rate, tau_yaw.meas(), tau_yaw.ref(), error, yaw_control);
 }
 
 // Horizontal controller to hold horizontal position (copied from control_land in newer versions)

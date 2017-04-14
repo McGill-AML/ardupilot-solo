@@ -49,8 +49,8 @@ void AC_TAU::initialize_tau()
 	_time_now = 0.0;
 	_k_const = 0.0;
 
-	_min_allowed_pos = 0.05; //0.02
-	_min_allowed_vel = 0.1;  //0.05 
+	_min_allowed_pos = 0.02; //0.02
+	_min_allowed_vel = 0.05;  //0.05 
 
 	// For logging purposes - NOTE: could initialize this another way
 	_tau_info.tauref 	= 0.0;
@@ -65,7 +65,7 @@ void AC_TAU::initialize_tau()
 
 void AC_TAU::set_minpos_minvel(float min_pos, float min_vel)
 {
-	_min_allowed_pos = min_pos
+	_min_allowed_pos = min_pos;
 	_min_allowed_vel = min_vel;
 }
 
@@ -109,7 +109,7 @@ void AC_TAU::meas_tau()
 		_measured_tau = _position/_velocity;
 
 	} else {
-		float time_mod = _time_now - 0.02;
+		float time_mod = _time_now - 0.05;
 		_measured_tau = 0.5*_k_const*(time_mod - _final_time*_final_time/time_mod);
 	}
 
@@ -124,9 +124,10 @@ void AC_TAU::meas_tau()
 void AC_TAU::error_tau()
 {	
 	// if tau measured is very small, the hybrid and kendoul error are 0
-	if (fabsf(_measured_tau) <= 0.01 || _k_const == 0.0) {
+	if (fabsf(_measured_tau) <= 0.05 || _k_const == 0.0) {
 		_kendoul = 0.0;
 		_hybrid = 0.0;
+		_err_inverse = 0.0;
 	
 	// else compute the kendoul and hybrid error as per the definition  		
 	} else {
@@ -144,11 +145,15 @@ void AC_TAU::error_tau()
 
 		// Kendoul Definition
 		_kendoul = -1.0*copysignf(1.0, _measured_tau)*-1.0*copysignf(1.0, _velocity)*(1 - _reference_tau/_measured_tau);
+
+		// Updated Inverse error
+		_err_inverse = -1.0*copysignf(1.0, _velocity)*(_reference_tau - _measured_tau)/(1.0+fabsf(_reference_tau));
 	}
 
-	// Saturate both Kendoul and Hybrid
+	// Saturate output of all errors
 	_kendoul = constrain_float(_kendoul, -1.0*_sat_err, _sat_err);
 	_hybrid = constrain_float(_hybrid, -1.0*_sat_err, _sat_err);
+	_err_inverse = constrain_float(_err_inverse, -1.0*_sat_err, _sat_err);
 }
 
 // Compute the switch between the two errors at 50% of final time

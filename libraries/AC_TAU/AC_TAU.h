@@ -42,6 +42,7 @@ public:
 	float ref() 			{ return _reference_tau; }
 	float switch_time() 	{ return _switch_time; }
 	float get_time_now()    { return _time_now; }
+	float error_inverse() 	{ return _err_inverse; }
 
 	// set accessors
 	void initial_position(float v)	{ _initial_position = v; }
@@ -76,6 +77,7 @@ protected:
 	float 		_kendoul;
 	float 		_hybrid;
 	float		_error_switch;
+	float 		_err_inverse;
 
 	float 		_final_time;
 	float		_final_position; // only used for tauposland and tauvelland (to feed correct position and velocity set points)

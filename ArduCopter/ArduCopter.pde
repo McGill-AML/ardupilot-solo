@@ -1073,6 +1073,8 @@ static void ten_hz_logging_loop()
     DataFlash.Log_Write_Tauland(LOG_TAUZ_MSG, tau_z_info); // z logging
     DataFlash.Log_Write_Tauland(LOG_TAUX_MSG, tau_x_info); // x logging 
     DataFlash.Log_Write_Tauland(LOG_TAUY_MSG, tau_y_info); // y logging
+    
+    tau_xy_log.ext2 = pos_control.get_throttle_hover();
     DataFlash.Log_Write_Tauland2(tau_xy_log);
 }
 

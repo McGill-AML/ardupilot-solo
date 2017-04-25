@@ -43,10 +43,11 @@ public:
 	float switch_time() 	{ return _switch_time; }
 	float get_time_now()    { return _time_now; }
 	float error_inverse() 	{ return _err_inverse; }
+	float error_linear()	{ return _err_linear; }
 
 	// set accessors
 	void initial_position(float v)	{ _initial_position = v; }
-
+	
 	// output for logging purposes
 	const       DataFlash_Class::Tau_info get_tau_info(void) const { return _tau_info; }
 
@@ -74,10 +75,12 @@ protected:
 	float 		_measured_tau;
 	float 		_reference_tau;
 
+	// Errors
 	float 		_kendoul;
 	float 		_hybrid;
 	float		_error_switch;
 	float 		_err_inverse;
+	float 		_err_linear;
 
 	float 		_final_time;
 	float		_final_position; // only used for tauposland and tauvelland (to feed correct position and velocity set points)

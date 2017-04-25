@@ -75,13 +75,13 @@ static void tauposland_gps_run()
         land_pause = false;
     }
     
-    land_run_horizontal_control();
-    tau_pos_land_run_vertical_control(land_pause);
+    tauland_run_horizontal_control();
+    tauposland_run_vertical_control(land_pause);
 }
 
 // Vertical controller for tau landing called from tauposland_run()
 //      also checks if we have landed.
-static void tau_pos_land_run_vertical_control(bool pause_descent)
+static void tauposland_run_vertical_control(bool pause_descent)
 {
     /// TAU CONTROL SECTION 
  
@@ -133,7 +133,7 @@ static void tau_pos_land_run_vertical_control(bool pause_descent)
 
 // horizontal controller for tau landing called from tauposland_run() using position setpoints
 //      also checks if we have landed.
-/*static void tau_pos_land_run_horizontal_control()
+/*static void tauposland_run_horizontal_control()
 {
     // get current time    
     time_now = millis()*0.001f - tauland_start_time*0.001f; // (s), getting converted to a float 

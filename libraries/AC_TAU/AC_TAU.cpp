@@ -110,6 +110,11 @@ void AC_TAU::meas_tau()
 
 	} else {
 		float time_mod = _time_now - 0.05;
+
+		if (time_mod < 0.0) { 
+			time_mod = 0.0;	// At the beginning of the maneuver, this value is negative
+		} 
+
 		_measured_tau = 0.5*_k_const*(time_mod - _final_time*_final_time/time_mod);
 	}
 
@@ -128,6 +133,7 @@ void AC_TAU::error_tau()
 		_kendoul = 0.0;
 		_hybrid = 0.0;
 		_err_inverse = 0.0;
+		_err_linear = 0.0;
 	
 	// else compute the kendoul and hybrid error as per the definition  		
 	} else {
@@ -148,12 +154,16 @@ void AC_TAU::error_tau()
 
 		// Updated Inverse error
 		_err_inverse = -1.0*copysignf(1.0, _velocity)*(_reference_tau - _measured_tau)/(1.0+fabsf(_reference_tau));
+
+		// Linear error
+		_err_linear = -1.0*copysignf(1.0, _velocity)*(_reference_tau - _measured_tau);
 	}
 
 	// Saturate output of all errors
 	_kendoul = constrain_float(_kendoul, -1.0*_sat_err, _sat_err);
 	_hybrid = constrain_float(_hybrid, -1.0*_sat_err, _sat_err);
 	_err_inverse = constrain_float(_err_inverse, -1.0*_sat_err, _sat_err);
+	_err_linear = constrain_float(_err_linear, -1.0*_sat_err, _sat_err);
 }
 
 // Compute the switch between the two errors at 50% of final time

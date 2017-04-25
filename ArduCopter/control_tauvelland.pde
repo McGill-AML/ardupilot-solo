@@ -76,13 +76,13 @@ static void tauvelland_gps_run()
         land_pause = false;    
     }
     
-    land_run_horizontal_control();
-    tau_vel_land_run_vertical_control(land_pause);
+    tauland_run_hold_horizontal_control();
+    tauvelland_run_vertical_control(land_pause);
 }
 
 // Vertical controller for tau landing called from tauvelland_run()
 //      also checks if we have landed.
-static void tau_vel_land_run_vertical_control(bool pause_descent)
+static void tauvelland_run_vertical_control(bool pause_descent)
 {
     /// TAU CONTROL SECTION 
  

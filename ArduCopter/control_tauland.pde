@@ -45,7 +45,7 @@ static float tau_dt = 0.0025;
 static float hov_thr_default;
 
 // declare pid block
-static AC_PID tau_pid_z(tau_p, tau_i, tau_d, 15.0, tau_filter, tau_dt); 
+static AC_PID tau_pid_z(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
 static AC_PID tau_pid_x(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
 static AC_PID tau_pid_y(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt);
 static AC_PID tau_pid_yaw(tau_p, tau_i, tau_d, tau_imax, tau_filter, tau_dt); 
@@ -91,13 +91,13 @@ static bool tauland_init(bool ignore_checks)
     tau_yaw(g.tau_time_final, g.tau_psi_cons);
 
     // Initialize PID to the correct values
-    tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
+    tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, 15.0, tau_filter, tau_dt);
     tau_pid_z.reset_filter();
 
-    tau_pid_x(g.tau_x_pid_p, g.tau_x_pid_i, g.tau_xy_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
+    tau_pid_x(g.tau_x_pid_p, g.tau_x_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
     tau_pid_x.reset_filter();
 
-    tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, g.tau_psi_pid_p, tau_filter, tau_dt);
+    tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
     tau_pid_y.reset_filter();
 
     tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);

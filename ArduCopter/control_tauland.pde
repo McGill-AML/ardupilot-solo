@@ -25,6 +25,10 @@ static float velocity_y;
 static float tau_control_input;
 static int count_landed;
 
+static float target_z;
+static float target_x;
+static float target_y;
+
 // Approach Angle
 static float beta_approach; // approach angled from the vehicle perspective
 static float alpha_0_approach; // initial approach angle using planar position
@@ -103,10 +107,14 @@ static bool tauland_init(bool ignore_checks)
     tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
     tau_pid_yaw.reset_filter();
 
-    // Store hover initial value
+    // Store hover initial value and target values
+    target_z = g.tau_target_z;
+    target_x = g.tau_target_x;
+    target_y = g.tau_target_y;
     hov_thr_default = pos_control.get_throttle_hover();
 
     // Approach angle relative to vector joining the initial and target
+    beta_approach = constrain_float(beta_approach, -89.0, 89.0);
     if (g.tau_approach_angle == 0.0) {
         // The following is done so that we dont have 0 tau reference and try to match that
         tau_y(g.tau_time_final, g.tau_x_cons);  // Set the same value for the K constant
@@ -211,7 +219,7 @@ static void tauland_run_vertical_control()
 
     // get position z in target frame
     // position_z = inertial_nav.get_altitude()/100.0 - g.tau_target_z; // the inav position estimate drifts a lot
-    position_z = current_loc.alt/100.0 - g.tau_target_z; // (m) --> to land 1.0 m above the ground
+    position_z = current_loc.alt/100.0 - target_z; // (m) --> to land 1.0 m above the ground
 
     // Tau object
     tau_z.set_pos_vel_time(position_z, velocity_z, time_now);
@@ -288,8 +296,8 @@ static void tauland_run_horizontal_control()
     }
 
     // Convert position to target frame
-    float pos_t_x =  cos(alpha_approach)*(position_x - g.tau_target_x) + sin(alpha_approach)*(position_y - g.tau_target_y);
-    float pos_t_y = -sin(alpha_approach)*(position_x - g.tau_target_x) + cos(alpha_approach)*(position_y - g.tau_target_y);
+    float pos_t_x =  cos(alpha_approach)*(position_x - target_x) + sin(alpha_approach)*(position_y - target_y);
+    float pos_t_y = -sin(alpha_approach)*(position_x - target_x) + cos(alpha_approach)*(position_y - target_y);
 
     // Convert velocity to target frame
     float vel_t_x =  cos(alpha_approach)*(velocity_x) + sin(alpha_approach)*(velocity_y);
@@ -474,7 +482,7 @@ static void tauland_check_destination()
             case TAU_VERTICAL_TAU_HORIZONTAL:
             
             case TAU_VERTICAL_HOLD_HORIZONTAL:
-                if (g.tau_target_z = 0.0 and count_landed >= 5 and current_loc.alt <= 25.0) {
+                if (g.tau_target_z <= 0.2 and count_landed >= 5 and current_loc.alt <= 25.0) {
                     set_mode(LAND);
                 } else if (count_landed > 6 and time_now >= tau_z.final_time()*0.99) {
                     set_mode(STOP);

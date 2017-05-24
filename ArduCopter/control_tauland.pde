@@ -23,7 +23,6 @@ static float position_y;
 static float velocity_y;
 
 static float tau_control_input;
-static int count_landed;
 
 static float target_z;
 static float target_x;
@@ -86,37 +85,20 @@ static bool tauland_init(bool ignore_checks)
     tauland_start_time = millis();     // millis is miliseconds, do proper conversion
     tauland_final_time = g.tau_time_final;
 
-    count_landed = 0;
-
     // Initialize Tau objects
     tau_z(g.tau_time_final, g.tau_z_cons);
     tau_x(g.tau_time_final, g.tau_x_cons);
     tau_y(g.tau_time_final, g.tau_y_cons);
     tau_yaw(g.tau_time_final, g.tau_psi_cons);
 
-    // Initialize PID to the correct values
-    tau_pid_z(g.tau_z_pid_p, g.tau_z_pid_i, g.tau_z_pid_d, 15.0, tau_filter, tau_dt);
-    tau_pid_z.reset_filter();
-
-    tau_pid_x(g.tau_x_pid_p, g.tau_x_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
-    tau_pid_x.reset_filter();
-
-    tau_pid_y(g.tau_y_pid_p, g.tau_y_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
-    tau_pid_y.reset_filter();
-
-    tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
-    tau_pid_yaw.reset_filter();
-
-    // Store hover initial value and target values
-    target_z = g.tau_target_z;
-    target_x = g.tau_target_x;
-    target_y = g.tau_target_y;
-    hov_thr_default = pos_control.get_throttle_hover();
+    // Set min vel to lower value than default for horizontal control because it works better
+    tau_x.set_minpos_minvel(0.02, 0.02);
+    tau_y.set_minpos_minvel(0.02, 0.02); 
 
     // Approach angle relative to vector joining the initial and target
     beta_approach = constrain_float(beta_approach, -89.0, 89.0);
     if (g.tau_approach_angle == 0.0) {
-        // The following is done so that we dont have 0 tau reference and try to match that
+        // The following is done so that we dont have 0 tau reference at 0 degree angle and try to match that
         tau_y(g.tau_time_final, g.tau_x_cons);  // Set the same value for the K constant
         beta_approach = 45.0*PI/180.0;          // Set pseudo angle of 45 degrees to ensure equal gap closure
 
@@ -126,6 +108,30 @@ static bool tauland_init(bool ignore_checks)
 
     alpha_0_approach = fast_atan2(inertial_nav.get_position().y, inertial_nav.get_position().x);
     alpha_approach = alpha_0_approach + beta_approach;
+
+    // Store hover initial value and target values
+    target_z = g.tau_target_z;
+    target_x = g.tau_target_x;
+    target_y = g.tau_target_y;
+    hov_thr_default = pos_control.get_throttle_hover();
+
+    // Gain Scheduling
+    float gain_x = (inertial_nav.get_position().x/100.0 - target_x)/g.final_time;
+    float gain_y = (inertial_nav.get_position().y/100.0 - target_y)/g.final_time;
+    float gain_z = (current_loc.alt/100.0 - target_z)/g.final_time;
+
+    // Initialize PID to the correct values
+    tau_pid_z(g.tau_z_pid_p*gain_z, g.tau_z_pid_i*gain_z, g.tau_z_pid_d*gain_z, 15.0, tau_filter, tau_dt);
+    tau_pid_z.reset_filter();
+
+    tau_pid_x(g.tau_x_pid_p*gain_x, g.tau_x_pid_i*gain_x, g.tau_xy_pid_d*gain_x, tau_imax, tau_filter, tau_dt);
+    tau_pid_x.reset_filter();
+
+    tau_pid_y(g.tau_y_pid_p*gain_y, g.tau_y_pid_i*gain_y, g.tau_xy_pid_d*gain_y, tau_imax, tau_filter, tau_dt);
+    tau_pid_y.reset_filter();
+
+    tau_pid_yaw(g.tau_psi_pid_p, g.tau_psi_pid_i, g.tau_xy_pid_d, tau_imax, tau_filter, tau_dt);
+    tau_pid_yaw.reset_filter();
 
     // Set the desired tau land mode
     if (g.tau_z_cons == 0.0) {
@@ -174,6 +180,7 @@ static void tauland_gps_run()
         return;
     }
 
+    // Switch case to run the correct landing controllers
     switch(tau_land_mode) {
         case TAU_VERTICAL_HOLD_HORIZONTAL:
             tauland_run_hold_horizontal_control();
@@ -194,7 +201,8 @@ static void tauland_gps_run()
             set_mode(STOP);
             break;    
     }
-    tauland_check_destination();
+    // Check to see if we have landed to switch out of autonomous land mode
+    tauland_check_destination(); 
 }
 
 // Vertical controller for tau landing called from myland_run()
@@ -482,13 +490,13 @@ static void tauland_check_destination()
             case TAU_VERTICAL_TAU_HORIZONTAL:
             
             case TAU_VERTICAL_HOLD_HORIZONTAL:
-                if (g.tau_target_z <= 0.2 and count_landed >= 5 and current_loc.alt <= 25.0) {
+                // Removed requirment of count_landed for vertical
+                if (g.tau_target_z <= 0.2 and current_loc.alt <= 25.0) { 
                     set_mode(LAND);
-                } else if (count_landed > 6 and time_now >= tau_z.final_time()*0.99) {
+                } else if (time_now >= tau_z.final_time()*0.99) {
                     set_mode(STOP);
                 }
 
-                count_landed++;
                 break;
 
             case HOLD_VERTICAL_TAU_HORIZONTAL:

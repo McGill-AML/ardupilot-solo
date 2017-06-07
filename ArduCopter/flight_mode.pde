@@ -70,8 +70,10 @@ static bool set_mode(uint8_t mode)
             success = drift_init(ignore_checks);
             break;
 
+        // HACKING THE SPORT MODE SO I CAN SEND TAULAND PROMPTS FROM THE CONTROLLER
         case SPORT:
-            success = sport_init(ignore_checks);
+            success = tauland_init(ignore_checks);
+            // success = sport_init(ignor_checks);
             break;
 
         case FLIP:
@@ -195,8 +197,10 @@ static void update_flight_mode()
             drift_run();
             break;
 
+        // HACKING THE SPORT MODE SO I CAN SEND TAULAND PROMPTS FROM THE CONTROLLER
         case SPORT:
-            sport_run();
+            // sport_run();
+            tauland_run();
             break;
 
         case FLIP:
@@ -340,6 +344,7 @@ static void notify_flight_mode(uint8_t mode) {
         case TAULAND:
         case TAUPOSLAND:
         case TAUVELLAND:
+        case SPORT:     // HACKING TO SHOW FLASHING LIGHTS ON SPORT MODE, WHICH CALLS TAULAND
         case LAND:
             // autopilot modes
             AP_Notify::flags.autopilot_mode = true;
@@ -392,7 +397,8 @@ print_flight_mode(AP_HAL::BetterStream *port, uint8_t mode)
         port->print_P(PSTR("DRIFT"));
         break;
     case SPORT:
-        port->print_P(PSTR("SPORT"));
+        // HACKING SPORT MODE
+        port->print_P(PSTR("SPORT,TAULAND"));
         break;
     case FLIP:
         port->print_P(PSTR("FLIP"));

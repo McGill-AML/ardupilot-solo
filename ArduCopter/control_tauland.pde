@@ -117,9 +117,9 @@ static bool tauland_init(bool ignore_checks)
     hov_thr_default = pos_control.get_throttle_hover();
 
     // Gain Scheduling
-    float gain_x = (inertial_nav.get_position().x/100.0 - target_x)/g.tau_time_final;
-    float gain_y = (inertial_nav.get_position().y/100.0 - target_y)/g.tau_time_final;
-    float gain_z = (current_loc.alt/100.0 - target_z)/g.tau_time_final;
+    float gain_x = fabsf(inertial_nav.get_position().x/100.0 - target_x)/g.tau_time_final;
+    float gain_y = fabsf(inertial_nav.get_position().y/100.0 - target_y)/g.tau_time_final;
+    float gain_z = fabsf(current_loc.alt/100.0 - target_z)/g.tau_time_final;
 
     // Initialize PID to the correct values
     tau_pid_z(g.tau_z_pid_p*gain_z, g.tau_z_pid_i*gain_z, g.tau_z_pid_d*gain_z, 15.0, tau_filter, tau_dt);
@@ -244,7 +244,7 @@ static void tauland_run_vertical_control()
     // PID SECTION
     // set Error
     // float error = tau_z.error_switch(); // No longer using error switch
-    float error = tau_z.hybrid();
+    float error = tau_z.kendoul();
     tau_pid_z.set_input_filter_d(error);
     
     // get pid error out. Note sometimes it is neceassy to reset the i flags? and sometimes you call them separately. 
@@ -320,8 +320,8 @@ static void tauland_run_horizontal_control()
     tau_y.update_tau();
 
     // Error calculation - Use Hybrid instead of error_switch
-    float error_x = tau_x.hybrid();
-    float error_y = tau_y.hybrid();
+    float error_x = tau_x.kendoul();
+    float error_y = tau_y.kendoul();
     tau_pid_x.set_input_filter_d(error_x);
     tau_pid_y.set_input_filter_d(error_y);
 
@@ -492,12 +492,11 @@ static void tauland_check_destination()
             
             case TAU_VERTICAL_HOLD_HORIZONTAL:
                 // Removed requirment of count_landed for vertical
-                if (g.tau_target_z <= 0.2 and current_loc.alt <= 25.0) { 
+                if (g.tau_target_z <= 0.2 and current_loc.alt <= 40.0) { 
                     set_mode(LAND);
                 } else if (time_now >= tau_z.final_time()*0.99) {
                     set_mode(STOP);
                 }
-
                 break;
 
             case HOLD_VERTICAL_TAU_HORIZONTAL:

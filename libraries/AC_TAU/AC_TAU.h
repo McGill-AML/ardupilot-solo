@@ -44,6 +44,8 @@ public:
 	float get_time_now()    { return _time_now; }
 	float error_inverse() 	{ return _err_inverse; }
 	float error_linear()	{ return _err_linear; }
+	float get_pos_now()     { return _position; }
+	float get_vel_now() 	{ return _velocity; }
 
 	// set accessors
 	void initial_position(float v)	{ _initial_position = v; }

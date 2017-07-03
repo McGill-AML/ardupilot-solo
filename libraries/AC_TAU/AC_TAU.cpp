@@ -109,13 +109,15 @@ void AC_TAU::meas_tau()
 		_measured_tau = _position/_velocity;
 
 	} else {
-		float time_mod = _time_now - 0.05;
+		float new_time;
 
-		if (time_mod < 0.0) { 
-			time_mod = 0.0;	// At the beginning of the maneuver, this value is negative
-		} 
+		if (_time_now <= 0.05) { 
+			new_time = 0.001;	// At the beginning of the maneuver, this value is negative
+		} else {
+			new_time = _time_now - 0.05;
+		}
 
-		_measured_tau = 0.5*_k_const*(time_mod - _final_time*_final_time/time_mod);
+		_measured_tau = 0.5*_k_const*(new_time - _final_time*_final_time/new_time);;
 	}
 
 	// Saturate the measured tau
@@ -185,20 +187,20 @@ void AC_TAU::error_switch_tau()
 
 // Update tau ref, tau meas, error
 void AC_TAU::update_tau()
-{
+{	
 	// 1) Call Reference Tau
 	ref_tau();
-
+	
 	// 2) Calculate Measured Tau
 	meas_tau();
-
-	// 3) Calculate Kendoul and Hybrid Error
+	
+	// // 3) Calculate Kendoul and Hybrid Error
 	error_tau();
-
-	// 4) Smoothly switch the error at 0.5*_final_time
+	
+	// // 4) Smoothly switch the error at 0.5*_final_time
 	error_switch_tau();
-
-	// 5) update _tau_info for logging purposes
+	
+	// // 5) update _tau_info for logging purposes
 	_tau_info.tauref 	= _reference_tau;
 	_tau_info.taumeas 	= _measured_tau;
 	_tau_info.kendoul 	= _kendoul;

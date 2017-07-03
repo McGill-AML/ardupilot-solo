@@ -94,10 +94,11 @@ static bool tauland_init(bool ignore_checks)
     // Set min vel to lower value than default for horizontal control because it works better
     tau_x.set_minpos_minvel(0.02, 0.02);
     tau_y.set_minpos_minvel(0.02, 0.02); 
+    
 
     // Approach angle relative to vector joining the initial and target
     beta_approach = constrain_float(beta_approach, -89.0, 89.0);
-    if (g.tau_approach_angle <= 0.01 or g.tau_approach_angle >= -0.01) {
+    if (g.tau_approach_angle <= 0.01 and g.tau_approach_angle >= -0.01) {
         // The following is done so that we dont have 0 tau reference at 0 degree angle and try to match that
         tau_y(g.tau_time_final, g.tau_x_cons);  // Set the same value for the K constant
         beta_approach = 45.0*PI/180.0;          // Set pseudo angle of 45 degrees to ensure equal gap closure
@@ -161,6 +162,7 @@ static void tauland_run()
 {
     if (land_with_gps) {
         tauland_gps_run();
+        // land_gps_run();
     }else{
         // land_nogps_run();
         land_gps_run();
@@ -204,6 +206,7 @@ static void tauland_gps_run()
             set_mode(STOP);
             break;    
     }
+
     // Check to see if we have landed to switch out of autonomous land mode
     tauland_check_destination(); 
 }
@@ -222,11 +225,14 @@ static void tauland_run_vertical_control()
     // get velocity
     // at time 0.0 s hard code velocity to 0.0 m/s (this may need to be changed)
     if (time_now <= 0.05) {
-        velocity_z = 0.0;
+        velocity_z = 0.001;
     } else {
         float velocity = inertial_nav.get_velocity_z(); // this is a function call to the ahrs (estimator) (AP_inertialNav) (cm/s)
         velocity_z = velocity/100.0; // (m/s)
     }
+
+        // float velocity = inertial_nav.get_velocity_z(); // this is a function call to the ahrs (estimator) (AP_inertialNav) (cm/s)
+        // velocity_z = velocity/100.0; // (m/s)
 
     // get position z in target frame
     // position_z = inertial_nav.get_altitude()/100.0 - g.tau_target_z; // the inav position estimate drifts a lot
@@ -259,7 +265,7 @@ static void tauland_run_vertical_control()
     ///////////////////////////
     /// TAU CONTROL SECTION ///
     ///////////////////////////
-    
+        
     /// SEND COMMANDS
     float tau_thr_out = tau_control_updated + hov_thr_default;  // Use only constant hov_thr_default value 
     tau_thr_out = constrain_float(tau_thr_out, hov_thr_default*0.7, hov_thr_default*3.5);
@@ -272,7 +278,7 @@ static void tauland_run_vertical_control()
 
     /// PRINT TO SCREEN:
     // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, thr_out: %3.3f, ken: %3.3f, hyb: %3.3f, hov: %3.3f, cont_inp: %3.3f \n", position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, tau_z.kendoul(), tau_z.hybrid(), motors.get_throttle_hover(), tau_control_updated);
-    // hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov_thr: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
+    hal.console->printf("pos: %3.3f, vel: %3.3f, time: %3.3f, meas: %3.3f, ref: %3.3f, err: %3.3f, total_out: %3.3f, hov_thr: %3.3f, cont_inp: %3.3f \n",position_z, velocity_z, time_now, tau_z.meas(), tau_z.ref(), error, tau_thr_out, pos_control.get_throttle_hover(), tau_control_updated);
 }
 
 // Horizontal controller for tau landing called from myland_run()
@@ -367,9 +373,15 @@ static void tauland_run_horizontal_control()
     float pitch_actual = pos_control.get_pitch(); // this is not actual pitch... some other measure
     float roll_actual = pos_control.get_roll();
 
-    // hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
-    // hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
-    // hal.console->printf("cos_ap: %3.3f, sin_ap: %3.3f, alpha_approach: %3.3f, beta_approach: %3.3f, psi: %3.3f, pos_t_x: %3.3f, pos_t_y: %3.3f, vel_t_x: %3.3f, vel_t_y: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);
+    // target frame:
+    // hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_act: %5.3f, tau_x: %3.3f, tau_x_me: %3.3f, err_x: %3.3f \n", time_now, pos_t_x, vel_t_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
+    // hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_act:  %5.3f, tau_y: %3.3f, tau_y_me: %3.3f, err_y: %3.3f \n", time_now, pos_t_y, vel_t_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
+    
+
+    // inertial frame: 
+    hal.console->printf("time: %3.3f, posx: %3.3f, velx: %3.3f, pitch_des: %3.3f, pitch_actual: %5.3f, tau_x: %3.3f, tau_x_meas: %3.3f, err_x: %3.3f \n", time_now, position_x, velocity_x, pitch, pitch_actual, tau_x.meas(), tau_x.ref(), error_x);
+    hal.console->printf("time: %3.3f, posy: %3.3f, vely: %3.3f, roll_des:  %3.3f, roll_actual:  %5.3f, tau_y: %3.3f, tau_y_meas: %3.3f, err_y: %3.3f \n", time_now, position_y, velocity_y, roll,  roll_actual,  tau_y.meas(), tau_y.ref(), error_y);
+    hal.console->printf("cos_a: %3.3f, sin_a: %3.3f, alpa_aph: %3.3f, beta_aph: %3.3f, psi: %3.3f, pos_tx: %3.3f, pos_ty: %3.3f, vel_tx: %3.3f, vel_ty: %3.3f \n", cos_ap, sin_ap, alpha_approach, beta_approach, psi, pos_t_x, pos_t_y, vel_t_x, vel_t_y);
 }
 
 // Psi controller using tau 
